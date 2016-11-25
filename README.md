@@ -1,15 +1,4 @@
----
-output: github_document
----
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
-
-
-[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) 
-[![Project Status: Concept - Minimal or no implementation has been done yet.](http://www.repostatus.org/badges/0.1.0/concept.svg)](http://www.repostatus.org/#concept)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv) 
-![downloads](http://cranlogs.r-pkg.org/badges/grand-total/paretoconv)
+[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![Project Status: Concept - Minimal or no implementation has been done yet.](http://www.repostatus.org/badges/0.1.0/concept.svg)](http://www.repostatus.org/#concept) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv) ![downloads](http://cranlogs.r-pkg.org/badges/grand-total/paretoconv)
 
 paretoconv is ...
 
@@ -19,32 +8,30 @@ The following data sets are included:
 
 ### News
 
-- Version  released
+-   Version released
 
 ### Installation
 
-
-```r
+``` r
 devtools::install_github("mpadge/paretoconv")
 ```
 
-
+    #> Loading paretoconv
+    #> Updating paretoconv documentation
+    #> Loading paretoconv
 
 ### Usage
 
-
-```r
+``` r
 library(paretoconv)
 
 # current verison
 packageVersion("paretoconv")
-
 ```
 
 ### Test Results
 
-
-```r
+``` r
 library(paretoconv)
 library(testthat)
 

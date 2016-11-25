@@ -1,5 +1,10 @@
 #' Convolution of Pareto distributions for non-integer alpha
 #'
+#' Convolutes multiple Pareto distributions following 'The Distribution of Sums
+#' of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' by Colin
+#' Ramsay (Communications in Statistics - Theory and Methods 37:2177-2184,
+#' 2008).
+#'
 #' @param x value of independent variable
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation. 
@@ -20,7 +25,6 @@ ramsay_nonint <- function (x, a, n)
 
     bet <- 1 # beta value fixed for my purposes always at 1
 
-    # colin ramsay 2008
     # Kummer's M function, the confluent hypergeometric _1F_1
     kM <- function (a, b, x) fAsianOptions::kummerM (a, b, x)
     # NOTE: cot (z) = 1 / tan (z)
