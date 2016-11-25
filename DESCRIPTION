@@ -8,6 +8,9 @@ Depends:
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Imports:
+    cubature,
+    fAsianOptions
 Suggests:
     testthat
 RoxygenNote: 5.0.1
