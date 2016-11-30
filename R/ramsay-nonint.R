@@ -6,25 +6,22 @@
 #' @param n Number of convolutions
 #'
 #' @return Single value of chi
-chi <- function (x, a, n)
+chi <- function (z, a, n)
 {
     # Kummer's M function, the confluent hypergeometric _1F_1
-    kM <- function (a, b, x) fAsianOptions::kummerM (a, b, x) # Eq. (13)
+    kM <- function (a, b, z) fAsianOptions::kummerM (a, b, z) # Eq. (13)
     # NOTE: cot (z) = 1 / tan (z)
-    # Rxa is Eq. (12)
-    Rxa <- function (x, a) 
-        kM (1, 1-a, -x) - pi * x ^ a * exp (-x) / (tan (pi * a) * gamma (a))
-    Ixa <- function (x, a) pi * x ^ a * exp (-x) / gamma (a) # Eq. (6)
-
-    # Then the value of chi from Eq. (8)
-    s1 <- function (x, a, n, r)
+    RI <- function (z, a, n, r)
     {
-        Rn <- Rxa (x, a) ^ (n - 2 * r - 1)
-        In <- Ixa (x, a) ^ (2 * r + 1)
-        (-1) ^ r * choose (n, 2 * r + 1) * Rn * In / pi
+        Iza <- pi * z ^ a * exp (-z) / gamma (a) # Eq. (6)
+        Rza <- kM (1, 1-a, -z) - Iza / tan (pi * a) # Eq. (12)
+        Iza ^ (2 * r + 1) * Rza ^ (n - 2 * r - 1)
     }
+    # Then the value of chi from Eq. (8)
+    s1 <- function (z, a, n, r)
+        (-1) ^ r * choose (n, 2 * r + 1) * RI (z, a, n, r) / pi
     nseq <- 0:floor ((n - 1) / 2)
-    sum (sapply (nseq, function (i) s1 (x, a, n, i)))
+    sum (sapply (nseq, function (i) s1 (z, a, n, i)))
 }
 
 #' CDF for Convolution of Pareto distributions for non-integer alpha
@@ -50,10 +47,10 @@ ramsay_nonint_cdf <- function (x, a, n)
 {
     bet <- set_beta () # Always = 1
 
-    # In this integrand, y is ramsay's x and x is his t, so his F_n(t) is here
-    # F_n(x), and the integral is over y-values
-    integrand <- function (y, x, a, n) 
-        (1 - exp (-x * y / bet)) * Re (chi (y, a, n)) / y
+    # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here
+    # F_n(x), and the integral is over z-values
+    integrand <- function (z, x, a, n) 
+        (1 - exp (-x * z / bet)) * Re (chi (z, a, n)) / z
     upper <- 1e2
     count <- 0
     while (integrand (upper, max (x), a, n) != 0)
@@ -90,10 +87,10 @@ ramsay_nonint_pdf <- function (x, a, n)
 {
     bet <- set_beta () # Always = 1
 
-    # In this integrand, y is ramsay's x and x is his t, so his F_n(t) is here
-    # F_n(x), and the integral is over y-values
-    integrand <- function (y, x, a, n)
-        exp (-x * y / bet) * Re (chi (y, a, n))
+    # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here
+    # F_n(x), and the integral is over z-values
+    integrand <- function (z, x, a, n)
+        exp (-x * z / bet) * Re (chi (z, a, n))
     upper <- 1e2
     count <- 0
     while (integrand (upper, max (x), a, n) != 0)

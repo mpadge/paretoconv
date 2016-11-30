@@ -67,6 +67,7 @@ ramsay_int_cdf <- function (x, a, n)
             ret <- 0
         return (ret)
     }
+    upper <- 1e2
     count <- 0
     while (integrand (upper, max (x), a, n) != 0)
     {
