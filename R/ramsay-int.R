@@ -14,10 +14,6 @@
 #'
 #' @return Value for the convolution of two Pareto distributions of shape a at
 #' the value x.
-#'
-#' @export
-#' @examples 
-#' ramsay_int (1, 1, 1)
 ramsay_int <- function (x, a, n)
 {
     if (a%%1 != 0) stop ("a must be an integer")
