@@ -58,7 +58,7 @@ options(width=120)
 ```{r}
 library(paretoconv)
 packageVersion("paretoconv") # current verison
-paretoconv (x=0:5, a=1, n=5)
+paretoconv (x=0:5, a=1, n=5, cdf=FALSE)
 ```
 Note that `x` can be a vector, while both `a` and `n` must single-valued.
 

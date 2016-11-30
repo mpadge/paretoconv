@@ -6,7 +6,7 @@
 \alias{paretoconv-package}
 \title{paretoconv.}
 \usage{
-paretoconv(x, a, n)
+paretoconv(x, a, n, cdf = FALSE)
 }
 \arguments{
 \item{x}{value of independent variable (may be a vector)}
@@ -15,6 +15,9 @@ paretoconv(x, a, n)
 Ramsay's notation (single value only)}
 
 \item{n}{Number of convolutions (single value only)}
+
+\item{cdf}{If TRUE, returns the cumulative distribution function, other
+returns the probability density function.}
 }
 \value{
 Value for the convolution of two Pareto distributions of shape a at

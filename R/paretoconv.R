@@ -14,6 +14,8 @@
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation (single value only)
 #' @param n Number of convolutions (single value only)
+#' @param cdf If TRUE, returns the cumulative distribution function, other
+#' returns the probability density function.
 #'
 #' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
 #' a and b are the primary and secondary shape parameters, respectively. It
@@ -25,7 +27,7 @@
 #' @export
 #' @examples 
 #' paretoconv (1:10, 1, 1)
-paretoconv <- function (x, a, n)
+paretoconv <- function (x, a, n, cdf=FALSE)
 {
     if (missing (x)) stop ('x must be supplied')
     if (missing (a)) stop ('a must be supplied')
@@ -40,8 +42,14 @@ paretoconv <- function (x, a, n)
     if (any (x < 0)) stop ('x must be positive')
 
     if (a%%1 == 0) 
-        ret <- sapply (x, function (i) ramsay_int (i, a, n))
+        if (cdf)
+            ret <- sapply (x, function (i) ramsay_int_cdf (i, a, n))
+        else
+            ret <- sapply (x, function (i) ramsay_int_pdf (i, a, n))
     else
-        ret <- sapply (x, function (i) ramsay_nonint (i, a, n))
+        if (cdf)
+            ret <- sapply (x, function (i) ramsay_nonint_cdf (i, a, n))
+        else
+            ret <- sapply (x, function (i) ramsay_nonint_pdf (i, a, n))
     return (ret)
 }
