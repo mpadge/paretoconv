@@ -24,14 +24,26 @@ devtools::install_github("mpadge/paretoconv")
 
 ``` r
 library(paretoconv)
-# current verison
-packageVersion("paretoconv")
+packageVersion("paretoconv") # current verison
 #> [1] '0.0.0'
 paretoconv (x=0:5, a=1, n=5)
 #> [1] 0.000000000 0.001966075 0.020217706 0.060057727 0.113677829 0.172729184
 ```
 
 Note that `x` can be a vector, while both `a` and `n` must single-valued.
+
+### Example
+
+``` r
+x <- 1:10 / 2
+n <- 1:5
+y <- lapply (n, function (i) paretoconv (x=x, a=1, n=i))
+cols <- rainbow (length (y))
+plot (x, y[[1]], "l", col=cols [1], ylim=range (y), xlab="x", ylab="p")
+for (i in 2:max (n)) lines (x, y[[i]], col=cols [i])
+legend ("topright", lwd=1, col=cols, bty="n", 
+        legend=sapply (seq (n), function (i) paste0 ("n=", i)))
+```
 
 ### Test Results
 
