@@ -1,8 +1,9 @@
 Package: paretoconv
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Calculates the n-fold Convolution of Two Pareto Distributions
+Version: 0.0.0
+Authors@R: person("Mark", "Padgham", email = "mark.padgham@email.com", role = c("aut", "cre"))
+Description: Calculates the n-fold convolution of two Pareto distributions using
+    the techniques devised by Colin Ramsay 
 Depends:
     R (>= 3.3.0)
 License: GPL-3 + file LICENSE

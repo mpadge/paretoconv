@@ -10,10 +10,10 @@
 #' (Communications in Statistics - Theory and Methods 37:2177-2184, 2008).
 #' }
 #'
-#' @param x value of independent variable
+#' @param x value of independent variable (may be a vector)
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
-#' Ramsay's notation.
-#' @param n Number of convolutions
+#' Ramsay's notation (single value only)
+#' @param n Number of convolutions (single value only)
 #'
 #' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
 #' a and b are the primary and secondary shape parameters, respectively. It
@@ -24,19 +24,24 @@
 #'
 #' @export
 #' @examples 
-#' paretoconv (1, 1, 1)
+#' paretoconv (1:10, 1, 1)
 paretoconv <- function (x, a, n)
 {
+    if (missing (x)) stop ('x must be supplied')
+    if (missing (a)) stop ('a must be supplied')
+    if (missing (n)) stop ('n must be supplied')
     if (!is.numeric (x)) stop ('x must be numeric')
     if (!is.numeric (a)) stop ('a must be numeric')
     if (!is.numeric (n)) stop ('n must be numeric')
+    if (length (a) > 1) stop ('a must be a single value only')
+    if (length (n) > 1) stop ('n must be a single value only')
 
     if (n%%1 != 0) stop ('n must be an integer')
-    if (x < 0) stop ('x must be positive')
+    if (any (x < 0)) stop ('x must be positive')
 
     if (a%%1 == 0) 
-        ret <- ramsay_int (x, a, n)
+        ret <- sapply (x, function (i) ramsay_int (i, a, n))
     else
-        ret <- ramsay_nonint (x, a, n)
+        ret <- sapply (x, function (i) ramsay_nonint (i, a, n))
     return (ret)
 }

@@ -9,12 +9,12 @@
 paretoconv(x, a, n)
 }
 \arguments{
-\item{x}{value of independent variable}
+\item{x}{value of independent variable (may be a vector)}
 
 \item{a}{The primary shape parameter of the Pareto distribution - alpha in
-Ramsay's notation.}
+Ramsay's notation (single value only)}
 
-\item{n}{Number of convolutions}
+\item{n}{Number of convolutions (single value only)}
 }
 \value{
 Value for the convolution of two Pareto distributions of shape a at
@@ -39,7 +39,7 @@ a and b are the primary and secondary shape parameters, respectively. It
 presumed here without loss of generality that b=1 and thus f(x)=a x^(1-a).
 }
 \examples{
-paretoconv (1, 1, 1)
+paretoconv (1:10, 1, 1)
 }
 \author{
 Mark Padgham
