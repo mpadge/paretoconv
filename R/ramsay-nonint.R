@@ -21,6 +21,7 @@
 #' ramsay_nonint (1, 0.9, 1)
 ramsay_nonint <- function (x, a, n)
 {
+    # NOTE: compare ramsay_nonint
     if (a%%1 == 0) stop ("a can not be an integer")
 
     bet <- 1 # beta value fixed for my purposes always at 1
@@ -49,3 +50,11 @@ ramsay_nonint <- function (x, a, n)
     cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=1e3,
                               x=x, a=a, n=n)$integral
 }
+#a <- 0:40 / 8
+#a <- a [which (a%%1 != 0)]
+#y <- lapply (a, function (i) ramsay_nonint (2, i, 4))
+#plot (a, y, "l")
+#points (a, y)
+#n <- ceiling (max (a))
+#junk <- sapply (1:ceiling (max (a)),  function (i)
+#                lines (rep (i, 2), c (-1e4, 1e4), col="gray", lty=2))
