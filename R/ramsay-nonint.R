@@ -8,14 +8,16 @@
 #' @return Single value of chi
 chi <- function (z, a, n)
 {
-    # Kummer's M function, the confluent hypergeometric _1F_1
-    kM <- function (a, b, z) fAsianOptions::kummerM (a, b, z) # Eq. (13)
+    # Kummer's M function, the confluent hypergeometric _1F_1. NOTE:
+    # fAsianOptions reverses the order of the arguments from Abramowitz &
+    # Stegun!
+    kM <- function (a, b, z) fAsianOptions::kummerM (z, a, b) # Eq. (13)
     # NOTE: cot (z) = 1 / tan (z)
     RI <- function (z, a, n, r)
     {
         Iza <- pi * z ^ a * exp (-z) / gamma (a) # Eq. (6)
         Rza <- kM (1, 1-a, -z) - Iza / tan (pi * a) # Eq. (12)
-        Iza ^ (2 * r + 1) * Rza ^ (n - 2 * r - 1)
+        Iza ^ (2 * r + 1) * Rza ^ (n - 2 * r - 1) # part of Eq. (8)
     }
     # Then the value of chi from Eq. (8)
     s1 <- function (z, a, n, r)
