@@ -54,7 +54,16 @@ ramsay_nonint_cdf <- function (x, a, n)
     # F_n(x), and the integral is over y-values
     integrand <- function (y, x, a, n) 
         (1 - exp (-x * y / bet)) * Re (chi (y, a, n)) / y
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=1e3,
+    upper <- 1e2
+    count <- 0
+    while (integrand (upper, max (x), a, n) != 0)
+    {
+        upper <- upper * 10
+        count <- count + 1
+        if (count > 6)
+            stop ('Integrand not convergent')
+    }
+    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
                               x=x, a=a, n=n)$integral
 }
 
@@ -85,6 +94,15 @@ ramsay_nonint_pdf <- function (x, a, n)
     # F_n(x), and the integral is over y-values
     integrand <- function (y, x, a, n)
         exp (-x * y / bet) * Re (chi (y, a, n))
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=1e3,
+    upper <- 1e2
+    count <- 0
+    while (integrand (upper, max (x), a, n) != 0)
+    {
+        upper <- upper * 10
+        count <- count + 1
+        if (count > 6)
+            stop ('Integrand not convergent')
+    }
+    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
                               x=x, a=a, n=n)$integral / bet
 }

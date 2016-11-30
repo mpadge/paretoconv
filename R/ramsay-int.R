@@ -1,4 +1,4 @@
-#' Ramsay's (2006) phi function of Eq. (13)
+#' Ramsay's (2006) modified phi function of Eq. (16)
 #'
 #' @param x value of independent variable
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
@@ -6,7 +6,7 @@
 #' @param n Number of convolutions
 #'
 #' @return Single value of phi
-phi <- function (x, a, n)
+phi16 <- function (x, a, n)
 {
     gam <- -digamma (1) # Euler's constant
 
@@ -62,12 +62,20 @@ ramsay_int_cdf <- function (x, a, n)
     integrand <- function (y, x, a, n) 
     {
         if (y != 0)
-            ret <- (1 - exp (-x * y / bet)) * phi (y, a, n) / y
+            ret <- (1 - exp (-x * y / bet)) * phi16 (y, a, n) / y
         else
             ret <- 0
         return (ret)
     }
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=1e3,
+    count <- 0
+    while (integrand (upper, max (x), a, n) != 0)
+    {
+        upper <- upper * 10
+        count <- count + 1
+        if (count > 6)
+            stop ('Integrand not convergent')
+    }
+    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
                               x=x, a=a, n=n)$integral
 }
 
@@ -96,7 +104,30 @@ ramsay_int_pdf <- function (x, a, n)
     bet <- set_beta () # Always = 1
 
     integrand <- function (y, x, a, n) 
-            exp (-(1 + x / (n * bet)) * y) * phi (y / n, a, n)
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=1e3,
-                              x=x, a=a, n=n)$integral / (n * bet)
+    {
+        if (y == 0)
+            ret <- 0
+        else
+            ret <- exp (-x * y / (n * bet)) * phi16 (y / n, a, n)
+        return (ret)
+    }
+    upper <- 1e2
+    count <- 0
+    while (integrand (upper, max (x), a, n) != 0)
+    {
+        upper <- upper * 10
+        count <- count + 1
+        if (count > 6)
+            stop ('Integrand not convergent')
+    }
+    # Integrals sometimes don't seem to converge even through the error is well
+    # below tol. A work-around is to set maxEval, and only remove it if error is
+    # > tol
+    int <- cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
+                                     x=x, a=a, n=n, maxEval=1e3)
+    if (int$error > 1e-5) # default adaptIntegrate tolerance
+        int <- cubature::adaptIntegrate (integrand, lowerLimit=0,
+                                         upperLimit=upper, x=x, a=a, n=n)
+
+    int$integral / (n * bet)
 }

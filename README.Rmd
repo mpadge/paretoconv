@@ -34,11 +34,11 @@ for *x>0*, *a>1* using the techniques devised by Colin Ramsay in
 
 ### Installation
 
-```{r, eval=FALSE}
+```{r git-install, eval=FALSE}
 devtools::install_github("mpadge/paretoconv")
 ```
 
-```{r, echo=FALSE, message=FALSE}
+```{r install, echo=FALSE, message=FALSE}
 wd <- getwd ()
 while (length (grep ('paretoconv', getwd ())) > 0) setwd ("..")
 devtools::load_all ("paretoconv")
@@ -55,7 +55,7 @@ options(width=120)
 
 ### Usage
 
-```{r}
+```{r usage}
 library(paretoconv)
 packageVersion("paretoconv") # current verison
 paretoconv (x=0:5, a=1, n=5, cdf=FALSE)
@@ -64,20 +64,24 @@ Note that `x` can be a vector, while both `a` and `n` must single-valued.
 
 ### Example
 
-```{r, eval=FALSE}
-x <- 1:10 / 2
+Reproduction of Ramsay's (2006) Figure 2 of probability density functions for
+the first 5 convolutions of the Pareto pdf with shape parameter of *a=5*.
+
+```{r example, eval=FALSE}
+x <- 1:50 / 10
 n <- 1:5
-y <- lapply (n, function (i) paretoconv (x=x, a=1, n=i))
+y <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
 cols <- rainbow (length (y))
-plot (x, y[[1]], "l", col=cols [1], ylim=range (y), xlab="x", ylab="p")
-for (i in 2:max (n)) lines (x, y[[i]], col=cols [i])
+plot (NULL, NULL, xlim=range (x), ylim=range (y), xlab="x", ylab="p")
+for (i in n) lines (x, y[[i]], col=cols [i])
 legend ("topright", lwd=1, col=cols, bty="n", 
         legend=sapply (seq (n), function (i) paste0 ("n=", i)))
 ```
+![](./fig/README-example.png)
 
 ### Test Results
 
-```{r, eval=FALSE}
+```{r test, eval=FALSE}
 library(paretoconv)
 library(testthat)
 

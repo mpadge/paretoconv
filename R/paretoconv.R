@@ -14,15 +14,15 @@
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation (single value only)
 #' @param n Number of convolutions (single value only)
-#' @param cdf If TRUE, returns the cumulative distribution function, other
+#' @param cdf If TRUE, returns the cumulative distribution function, otherwise
 #' returns the probability density function.
 #'
 #' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
 #' a and b are the primary and secondary shape parameters, respectively. It
 #' presumed here without loss of generality that b=1 and thus f(x)=a x^(1-a).
 #'
-#' @return Value for the convolution of two Pareto distributions of shape a at
-#' the value x.
+#' @return Value for the CDF or PDF from the convolution of two Pareto
+#' distributions of shape a at the value x.
 #'
 #' @export
 #' @examples 

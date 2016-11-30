@@ -16,12 +16,12 @@ Ramsay's notation (single value only)}
 
 \item{n}{Number of convolutions (single value only)}
 
-\item{cdf}{If TRUE, returns the cumulative distribution function, other
+\item{cdf}{If TRUE, returns the cumulative distribution function, otherwise
 returns the probability density function.}
 }
 \value{
-Value for the convolution of two Pareto distributions of shape a at
-the value x.
+Value for the CDF or PDF from the convolution of two Pareto
+distributions of shape a at the value x.
 }
 \description{
 paretoconv.
