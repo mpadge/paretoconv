@@ -4,15 +4,11 @@
 
     paretoconv (x, a, n)
 
-which calculates the *n*-fold convolution of two Pareto distributions,
-\begin{equation}
-f(x)=a x^{1-a},
-\end{equation}
-for (*x*, *a*)&gt;0 using the techniques devised by Colin Ramsay in
+which calculates the *n*-fold convolution of two Pareto distributions, *f(x)=a x<sup>1-a</sup>*, for *x&gt;0*, *a&gt;1* using the techniques devised by Colin Ramsay in
 
-1.  'The Distribution of Sums of Certain I.I.D. Pareto Variates' (Communications in Statistics - Theory and Methods 35:395-405, 2006); and
+1.  'The Distribution of Sums of Certain I.I.D. Pareto Variates' (*Communications in Statistics - Theory and Methods* **35**:395-405, 2006); and
 
-2.  'The Distribution of Sums of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' (Communications in Statistics - Theory and Methods 37:2177-2184, 2008).
+2.  'The Distribution of Sums of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' (*Communications in Statistics - Theory and Methods* **37**:2177-2184, 2008).
 
 ### News
 
