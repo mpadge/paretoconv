@@ -53,17 +53,31 @@ ramsay_nonint_cdf <- function (x, a, n)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n) 
         (1 - exp (-x * z / bet)) * Re (chi (z, a, n)) / z
-    upper <- 1e2
-    count <- 0
-    while (integrand (upper, max (x), a, n) != 0)
+    # Integrals in these cases often diverge for high upper limits, so the
+    # approach here is to start with an upper limit of (10 * x), and increase by
+    # 10% until the relative change in value is < tol
+    tol <- 1e-5
+    chng <- 1
+    upper <- 10 * x
+    val_old <- cubature::adaptIntegrate (integrand, lowerLimit=0,
+                                         upperLimit=upper, x=x, a=a,
+                                         n=n)$integral
+    maxiter <- 1e3
+    niter <- 1
+    incr <- 0.1 # proportional increase in upper limit at each iteration
+    while (chng > tol && niter < maxiter)
     {
-        upper <- upper * 10
-        count <- count + 1
-        if (count > 6)
-            stop ('Integrand not convergent')
+        upper <- upper * (1 + incr)
+        val <- cubature::adaptIntegrate (integrand, lowerLimit=0,
+                                         upperLimit=upper, x=x, a=a,
+                                         n=n)$integral
+        chng <- abs (val - val_old) / val_old
+        val_old <- val
+        niter <- niter + 1
     }
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
-                              x=x, a=a, n=n)$integral
+    if (niter >= maxiter)
+        warning ("Integral did not converge!")
+    return (val)
 }
 
 #' PDF for Convolution of Pareto distributions for non-integer alpha
@@ -93,15 +107,29 @@ ramsay_nonint_pdf <- function (x, a, n)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n)
         exp (-x * z / bet) * Re (chi (z, a, n))
-    upper <- 1e2
-    count <- 0
-    while (integrand (upper, max (x), a, n) != 0)
+    # Integrals in these cases often diverge for high upper limits, so the
+    # approach here is to start with an upper limit of (10 * x), and increase by
+    # 10% until the relative change in value is < tol
+    tol <- 1e-5
+    chng <- 1
+    upper <- 10 * x
+    val_old <- cubature::adaptIntegrate (integrand, lowerLimit=0,
+                                         upperLimit=upper, x=x, a=a,
+                                         n=n)$integral
+    maxiter <- 1e3
+    niter <- 1
+    incr <- 0.1 # proportional increase in upper limit at each iteration
+    while (chng > tol && niter < maxiter)
     {
-        upper <- upper * 10
-        count <- count + 1
-        if (count > 6)
-            stop ('Integrand not convergent')
+        upper <- upper * (1 + incr)
+        val <- cubature::adaptIntegrate (integrand, lowerLimit=0,
+                                         upperLimit=upper, x=x, a=a,
+                                         n=n)$integral
+        chng <- abs (val - val_old) / val_old
+        val_old <- val
+        niter <- niter + 1
     }
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
-                              x=x, a=a, n=n)$integral / bet
+    if (niter >= maxiter)
+        warning ("Integral did not converge!")
+    return (val)
 }
