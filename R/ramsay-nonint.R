@@ -1,6 +1,6 @@
 #' Ramsay's (2006) chi function of Eq. (8)
 #'
-#' @param x value of independent variable
+#' @param z value of independent variable
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation. 
 #' @param n Number of convolutions

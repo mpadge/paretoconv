@@ -1,37 +1,37 @@
 #' Ramsay's (2006) modified phi function of Eq. (16)
 #'
-#' @param x value of independent variable
+#' @param z value of independent variable
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation. 
 #' @param n Number of convolutions
 #'
 #' @return Single value of phi
-phi16 <- function (x, a, n)
+phi16 <- function (z, a, n)
 {
     gam <- -digamma (1) # Euler's constant
 
     m <- a + 1 
     # Eq (13): phi_{m,n}(\nu) \sim (Ei_{m+1}(\nu)); here m=a+1
     if (m < 2)
-        t1 <- gam + log (x)
+        t1 <- gam + log (z)
     else
-        t1 <- gam + log (x) - sum(1/1:(m - 1))
-    t1 <- exp (-x) * x^(m - 1) * t1 / factorial (m-1)
+        t1 <- gam + log (z) - sum(1/1:(m - 1))
+    t1 <- exp (-z) * z^(m - 1) * t1 / factorial (m-1)
     # Note that R's factorial goes up to and includes 170
     qq <- 0:170
     qq <- qq [!qq %in% (m-1)]
     # TODO: Compare timing using cumprod instead of factorial
-    # Then note that x^qq generates Inf for large x, but in which case
-    # exp(-x)/q! will always be smaller, so Inf values may safely be
+    # Then note that z^qq generates Inf for large z, but in which case
+    # exp(-z)/q! will always be smaller, so Inf values may safely be
     # presumed to be zero 
-    t2 <- x ^ qq * exp (-x) / ((qq - m + 1) * factorial (qq))
+    t2 <- z ^ qq * exp (-z) / ((qq - m + 1) * factorial (qq))
     t2 <- sum (t2 [which (is.finite (t2) & !is.nan (t2))])
     eim <- t1 + t2 
 
     # Then the sum for phi_{a,n}(nu)
     rr <- 0:floor((n-1)/2)
     summand <- (-pi^2)^rr * choose (n, 2*rr+1) * eim ^ (n - 2 * rr - 1) * 
-        (x ^ a * exp (-x) / factorial (a)) ^ (2 * rr + 1)
+        (z ^ a * exp (-z) / factorial (a)) ^ (2 * rr + 1)
     (-1) ^ (n + 1) * a ^ n * sum (summand)
 }
 
