@@ -59,25 +59,15 @@ ramsay_int_cdf <- function (x, a, n)
 {
     bet <- set_beta () # Always = 1
 
-    integrand <- function (y, x, a, n) 
+    integrand <- function (z, x, a, n) 
     {
-        if (y != 0)
-            ret <- (1 - exp (-x * y / bet)) * phi16 (y, a, n) / y
+        if (z != 0)
+            ret <- (1 - exp (-x * z / bet)) * phi16 (z, a, n) / z
         else
             ret <- 0
         return (ret)
     }
-    upper <- 1e2
-    count <- 0
-    while (integrand (upper, max (x), a, n) != 0)
-    {
-        upper <- upper * 10
-        count <- count + 1
-        if (count > 6)
-            stop ('Integrand not convergent')
-    }
-    cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
-                              x=x, a=a, n=n)$integral
+    calc_integral (integrand, x, a, n, incr=10, rough=TRUE)
 }
 
 #' PDF for Convolution of Pareto distributions for integer alpha
@@ -104,31 +94,13 @@ ramsay_int_pdf <- function (x, a, n)
 {
     bet <- set_beta () # Always = 1
 
-    integrand <- function (y, x, a, n) 
+    integrand <- function (z, x, a, n) 
     {
-        if (y == 0)
+        if (z == 0)
             ret <- 0
         else
-            ret <- exp (-x * y / (n * bet)) * phi16 (y / n, a, n)
+            ret <- exp (-x * z / (n * bet)) * phi16 (z / n, a, n)
         return (ret)
     }
-    upper <- 1e2
-    count <- 0
-    while (integrand (upper, max (x), a, n) != 0)
-    {
-        upper <- upper * 10
-        count <- count + 1
-        if (count > 6)
-            stop ('Integrand not convergent')
-    }
-    # Integrals sometimes don't seem to converge even through the error is well
-    # below tol. A work-around is to set maxEval, and only remove it if error is
-    # > tol
-    int <- cubature::adaptIntegrate (integrand, lowerLimit=0, upperLimit=upper,
-                                     x=x, a=a, n=n, maxEval=1e3)
-    if (int$error > 1e-5) # default adaptIntegrate tolerance
-        int <- cubature::adaptIntegrate (integrand, lowerLimit=0,
-                                         upperLimit=upper, x=x, a=a, n=n)
-
-    int$integral / (n * bet)
+    calc_integral (integrand, x, a, n, incr=10, rough=TRUE) / (n * bet)
 }
