@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![Project Status: Concept - Minimal or no implementation has been done yet.](http://www.repostatus.org/badges/0.1.0/concept.svg)](http://www.repostatus.org/#concept) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv) [![codecov](https://codecov.io/gh/mpadge/paratoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv)
+[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![codecov](https://codecov.io/gh/mpadge/paratoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv) [![Project Status: WIP](http://www.repostatus.org/badges/0.1.0/wip.svg)](http://www.repostatus.org/#wip) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv)
 
 `paretoconv` contains only one function:
 
