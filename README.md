@@ -34,15 +34,19 @@ Note that `x` can be a vector, while both `a` and `n` must single-valued.
 
 ### Example
 
-Reproduction of Ramsay's (2006) Figure 2 of probability density functions for the first 5 convolutions of the Pareto pdf with shape parameter of *a=5*.
+Solid lines in this panel are a reproduction of Ramsay's (2006) Figure 2 of probability density functions for the first 5 convolutions of the Pareto pdf with shape parameter of *a=5*. Dashed lines are analogous values for the non-integer value of *a=4.5*.
 
 ``` r
 x <- 1:50 / 10
 n <- 1:5
-y <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
-cols <- rainbow (length (y))
-plot (NULL, NULL, xlim=range (x), ylim=range (y), xlab="x", ylab="p")
-for (i in n) lines (x, y[[i]], col=cols [i])
+yint <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
+ynon <- lapply (n, function (i) paretoconv (x=x, a=4.5, n=i))
+cols <- rainbow (length (n))
+plot (NULL, NULL, xlim=range (x), ylim=range (yint), xlab="x", ylab="p")
+for (i in n) {
+    lines (x, yint [[i]], col=cols [i])
+    lines (x, ynon [[i]], col=cols [i], lty=2)
+}
 legend ("topright", lwd=1, col=cols, bty="n", 
         legend=sapply (seq (n), function (i) paste0 ("n=", i)))
 ```
