@@ -90,7 +90,6 @@ ramsay_nonint_cdf <- function (x, a, n)
     integrand <- function (z, x, a, n) 
         (1 - exp (-x * z / bet)) * Re (chi (z, a, n)) / z
     calc_integral (integrand, x, a, n)
-    return (val)
 }
 
 #' PDF for Convolution of Pareto distributions for non-integer alpha

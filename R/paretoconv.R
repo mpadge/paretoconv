@@ -38,8 +38,9 @@ paretoconv <- function (x, a, n, cdf=FALSE)
     if (length (a) > 1) stop ('a must be a single value only')
     if (length (n) > 1) stop ('n must be a single value only')
 
-    if (n%%1 != 0) stop ('n must be an integer')
     if (any (x < 0)) stop ('x must be positive')
+    if (n%%1 != 0) stop ('n must be an integer')
+    if (n < 1) stop ('n must be an integer > 0')
 
     if (a%%1 == 0) 
         if (cdf)
