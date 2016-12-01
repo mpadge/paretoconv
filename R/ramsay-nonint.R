@@ -26,6 +26,42 @@ chi <- function (z, a, n)
     sum (sapply (nseq, function (i) s1 (z, a, n, i)))
 }
 
+#' Calculates integral for CDF or PDF function, f
+#'
+#' @param f The integrand function to be integrated
+#' @param x value of independent variable
+#' @param a The primary shape parameter of the Pareto distribution 
+#' @param n Number of convolutions
+#'
+#' @return Single value of integral
+calc_integral <- function (f, x, a, n)
+{
+    # Integrals in these non-integer cases often diverge for high upper limits,
+    # so the approach here is to start with an upper limit of (10 * x), and
+    # increase by 10% until the relative change in value is < tol
+    tol <- 1e-5
+    chng <- 1
+    upper <- 10 * x
+    val_old <- cubature::adaptIntegrate (f, lowerLimit=0, upperLimit=upper, x=x,
+                                         a=a, n=n)$integral
+    maxiter <- 1e3
+    niter <- 1
+    incr <- 0.1 # proportional increase in upper limit at each iteration
+    while (chng > tol && niter < maxiter)
+    {
+        upper <- upper * (1 + incr)
+        val <- cubature::adaptIntegrate (f, lowerLimit=0, upperLimit=upper, x=x,
+                                         a=a, n=n)$integral
+        chng <- abs (val - val_old) / val_old
+        val_old <- val
+        niter <- niter + 1
+    }
+    if (niter >= maxiter)
+        warning ("Integral did not converge!")
+    return (val)
+}
+
+
 #' CDF for Convolution of Pareto distributions for non-integer alpha
 #'
 #' Convolutes multiple Pareto distributions following 'The Distribution of Sums
@@ -53,30 +89,7 @@ ramsay_nonint_cdf <- function (x, a, n)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n) 
         (1 - exp (-x * z / bet)) * Re (chi (z, a, n)) / z
-    # Integrals in these cases often diverge for high upper limits, so the
-    # approach here is to start with an upper limit of (10 * x), and increase by
-    # 10% until the relative change in value is < tol
-    tol <- 1e-5
-    chng <- 1
-    upper <- 10 * x
-    val_old <- cubature::adaptIntegrate (integrand, lowerLimit=0,
-                                         upperLimit=upper, x=x, a=a,
-                                         n=n)$integral
-    maxiter <- 1e3
-    niter <- 1
-    incr <- 0.1 # proportional increase in upper limit at each iteration
-    while (chng > tol && niter < maxiter)
-    {
-        upper <- upper * (1 + incr)
-        val <- cubature::adaptIntegrate (integrand, lowerLimit=0,
-                                         upperLimit=upper, x=x, a=a,
-                                         n=n)$integral
-        chng <- abs (val - val_old) / val_old
-        val_old <- val
-        niter <- niter + 1
-    }
-    if (niter >= maxiter)
-        warning ("Integral did not converge!")
+    calc_integral (integrand, x, a, n)
     return (val)
 }
 
@@ -107,29 +120,5 @@ ramsay_nonint_pdf <- function (x, a, n)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n)
         exp (-x * z / bet) * Re (chi (z, a, n))
-    # Integrals in these cases often diverge for high upper limits, so the
-    # approach here is to start with an upper limit of (10 * x), and increase by
-    # 10% until the relative change in value is < tol
-    tol <- 1e-5
-    chng <- 1
-    upper <- 10 * x
-    val_old <- cubature::adaptIntegrate (integrand, lowerLimit=0,
-                                         upperLimit=upper, x=x, a=a,
-                                         n=n)$integral
-    maxiter <- 1e3
-    niter <- 1
-    incr <- 0.1 # proportional increase in upper limit at each iteration
-    while (chng > tol && niter < maxiter)
-    {
-        upper <- upper * (1 + incr)
-        val <- cubature::adaptIntegrate (integrand, lowerLimit=0,
-                                         upperLimit=upper, x=x, a=a,
-                                         n=n)$integral
-        chng <- abs (val - val_old) / val_old
-        val_old <- val
-        niter <- niter + 1
-    }
-    if (niter >= maxiter)
-        warning ("Integral did not converge!")
-    return (val)
+    calc_integral (integrand, x, a, n)
 }
