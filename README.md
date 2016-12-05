@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![codecov](https://codecov.io/gh/mpadge/paratoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv) [![Project Status: WIP](http://www.repostatus.org/badges/0.1.0/wip.svg)](http://www.repostatus.org/#wip) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv)
+[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![codecov](https://codecov.io/gh/mpadge/paretoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv) [![Project Status: WIP](http://www.repostatus.org/badges/0.1.0/wip.svg)](http://www.repostatus.org/#wip) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv)
 
 paretoconv
 ==========
@@ -64,7 +64,7 @@ legend ("topright", lwd=1, col=cols, bty="n",
 
 ``` r
 date()
-#> [1] "Thu Dec  1 19:07:40 2016"
+#> [1] "Mon Dec  5 21:31:16 2016"
 testthat::test_dir("tests/")
 #> testthat results ========================================================================================================
 #> OK: 15 SKIPPED: 0 FAILED: 0
