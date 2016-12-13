@@ -45,13 +45,10 @@ devtools::install_github("mpadge/paretoconv")
 ```
 
 ```{r install, echo=FALSE, message=FALSE}
-wd <- getwd ()
-while (length (grep ('paretoconv', getwd ())) > 0) setwd ("..")
-devtools::load_all ("paretoconv")
-#devtools::load_all ("paretoconv", recompile=TRUE)
-#devtools::document ("paretoconv")
-#goodpractice::gp ("paretoconv")
-setwd (wd)
+devtools::load_all (".")
+#devtools::load_all (".", recompile=TRUE)
+#devtools::document (".")
+#goodpractice::gp (".")
 #testthat::test_dir ("./tests/")
 ```
 

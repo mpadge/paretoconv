@@ -40,20 +40,20 @@ chi <- function (z, a, n)
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation. 
 #' @param n Number of convolutions
+#' @param x0 Lower cut-off point of classical heavy-tailed distribution
+#' (generally obtained emprically with the poweRlaw package).
 #'
 #' @note This version is for non-integer values of a. Integer values can be
 #' calculated with ramsay_int
 #'
 #' @return Value for the CDF of the convolution of two Pareto distributions of
 #' shape a at the value x.
-ramsay_nonint_cdf <- function (x, a, n)
+ramsay_nonint_cdf <- function (x, a, n, x0)
 {
-    bet <- set_beta () # Always = 1
-
     # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n) 
-        (1 - exp (-x * z / bet)) * Re (chi (z, a, n)) / z
+        (1 - exp (-x * z / x0)) * Re (chi (z, a, n)) / z
     calc_integral (integrand, x, a, n)
 }
 
@@ -70,19 +70,19 @@ ramsay_nonint_cdf <- function (x, a, n)
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation. 
 #' @param n Number of convolutions
+#' @param x0 Lower cut-off point of classical heavy-tailed distribution
+#' (generally obtained emprically with the poweRlaw package).
 #'
 #' @note This version is for non-integer values of a. Integer values can be
 #' calculated with ramsay_int
 #'
 #' @return Value for the PDF of the convolution of two Pareto distributions of
 #' shape a at the value x.
-ramsay_nonint_pdf <- function (x, a, n)
+ramsay_nonint_pdf <- function (x, a, n, x0)
 {
-    bet <- set_beta () # Always = 1
-
     # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n)
-        exp (-x * z / bet) * Re (chi (z, a, n))
+        exp (-x * z / x0) * Re (chi (z, a, n))
     calc_integral (integrand, x, a, n)
 }

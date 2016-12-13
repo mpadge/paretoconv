@@ -6,7 +6,7 @@
 \alias{paretoconv-package}
 \title{paretoconv.}
 \usage{
-paretoconv(x, a, n, cdf = FALSE)
+paretoconv(x, a, n, x0 = 1, cdf = FALSE)
 }
 \arguments{
 \item{x}{value of independent variable (may be a vector)}
@@ -15,6 +15,9 @@ paretoconv(x, a, n, cdf = FALSE)
 Ramsay's notation (single value only)}
 
 \item{n}{Number of convolutions (single value only)}
+
+\item{x0}{Lower cut-off point of classical heavy-tailed distribution
+(generally obtained emprically with the poweRlaw package).}
 
 \item{cdf}{If TRUE, returns the cumulative distribution function, otherwise
 returns the probability density function.}

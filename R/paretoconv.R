@@ -14,6 +14,8 @@
 #' @param a The primary shape parameter of the Pareto distribution - alpha in
 #' Ramsay's notation (single value only)
 #' @param n Number of convolutions (single value only)
+#' @param x0 Lower cut-off point of classical heavy-tailed distribution
+#' (generally obtained emprically with the poweRlaw package).
 #' @param cdf If TRUE, returns the cumulative distribution function, otherwise
 #' returns the probability density function.
 #'
@@ -27,7 +29,7 @@
 #' @export
 #' @examples 
 #' paretoconv (1:10, 1, 1)
-paretoconv <- function (x, a, n, cdf=FALSE)
+paretoconv <- function (x, a, n, x0=1, cdf=FALSE)
 {
     if (missing (x)) stop ('x must be supplied')
     if (missing (a)) stop ('a must be supplied')
@@ -42,15 +44,22 @@ paretoconv <- function (x, a, n, cdf=FALSE)
     if (n%%1 != 0) stop ('n must be an integer')
     if (n < 1) stop ('n must be an integer > 0')
 
+    xin <- x
+    x <- x - x0
+    x <- x [which (x > 0)]
+
     if (a%%1 == 0) 
         if (cdf)
-            ret <- sapply (x, function (i) ramsay_int_cdf (i, a, n))
+            ret <- sapply (x, function (i) ramsay_int_cdf (i, a, n, x0))
         else
-            ret <- sapply (x, function (i) ramsay_int_pdf (i, a, n))
+            ret <- sapply (x, function (i) ramsay_int_pdf (i, a, n, x0))
     else
         if (cdf)
-            ret <- sapply (x, function (i) ramsay_nonint_cdf (i, a, n))
+            ret <- sapply (x, function (i) ramsay_nonint_cdf (i, a, n, x0))
         else
-            ret <- sapply (x, function (i) ramsay_nonint_pdf (i, a, n))
+            ret <- sapply (x, function (i) ramsay_nonint_pdf (i, a, n, x0))
+
+    ret <- c (rep (NA, length (xin) - length (x)), ret)
+
     return (ret)
 }
