@@ -27,9 +27,12 @@ test_that ("sanity checks", {
 })
 
 test_that("ramsay-int", {
-              expect_that (paretoconv (x=1, a=1, n=1), is.numeric)
-              expect_that (paretoconv (x=1, a=0.5, n=1), is.numeric)
-              expect_that (paretoconv (x=1, a=1, n=1, cdf=TRUE), is.numeric)
-              expect_that (paretoconv (x=1, a=0.5, n=1, cdf=TRUE), is.numeric)
-              expect_true (length (paretoconv (x=1:3, a=1, n=1)) == 3)
+              expect_true (is.numeric (paretoconv (x=2, a=1, n=1)))
+              expect_true (is.numeric (paretoconv (x=2, a=1, n=1, cdf=TRUE)))
+              expect_true (length (paretoconv (x=2:4, a=1, n=1)) == 3)
+})
+
+test_that("ramsay-nonint", {
+              expect_true (is.numeric (paretoconv (x=2, a=0.5, n=1, cdf=TRUE)))
+              expect_true (length (paretoconv (x=2:4, a=0.5, n=1)) == 3)
 })
