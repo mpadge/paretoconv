@@ -1,5 +1,5 @@
 Package: paretoconv
-Title: Calculates the n-fold Convolution of Two Pareto Distributions
+Title: Calculates the N-Fold Convolution of Two Pareto Distributions
 Version: 0.0.0
 Authors@R: person("Mark", "Padgham", email = "mark.padgham@email.com", role = c("aut", "cre"))
 Description: Calculates the n-fold convolution of two Pareto distributions using
