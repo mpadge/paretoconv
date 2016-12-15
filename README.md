@@ -47,7 +47,7 @@ n <- 1:5
 yint <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
 ynon <- lapply (n, function (i) paretoconv (x=x, a=4.5, n=i))
 cols <- rainbow (length (n))
-plot (NULL, NULL, xlim=range (x), ylim=range (yint), xlab="x", ylab="p")
+plot (NULL, NULL, xlim=range (x), ylim=range (yint, na.rm=TRUE), xlab="x", ylab="p")
 for (i in n) {
     lines (x, yint [[i]], col=cols [i])
     lines (x, ynon [[i]], col=cols [i], lty=2)
@@ -64,10 +64,10 @@ legend ("topright", lwd=1, col=cols, bty="n",
 
 ``` r
 date()
-#> [1] "Mon Dec  5 21:31:16 2016"
+#> [1] "Thu Dec 15 13:11:26 2016"
 testthat::test_dir("tests/")
 #> testthat results ========================================================================================================
-#> OK: 15 SKIPPED: 0 FAILED: 0
+#> OK: 21 SKIPPED: 0 FAILED: 0
 #> 
 #> DONE ===================================================================================================================
 ```
