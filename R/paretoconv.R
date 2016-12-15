@@ -47,7 +47,7 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE)
     if (n == 0)
     {
         if (cdf)
-            y <- (x0 / x) ^ (a + 1)
+            y <- (x0 / x) ^ (a - 1)
         else
             y <- (a / x0) * (x / x0) ^ (-a)
     } else
