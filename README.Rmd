@@ -78,7 +78,7 @@ n <- 1:5
 yint <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
 ynon <- lapply (n, function (i) paretoconv (x=x, a=4.5, n=i))
 cols <- rainbow (length (n))
-plot (NULL, NULL, xlim=range (x), ylim=range (yint), xlab="x", ylab="p")
+plot (NULL, NULL, xlim=range (x), ylim=range (yint, na.rm=TRUE), xlab="x", ylab="p")
 for (i in n) {
     lines (x, yint [[i]], col=cols [i])
     lines (x, ynon [[i]], col=cols [i], lty=2)
