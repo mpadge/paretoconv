@@ -20,10 +20,15 @@ test_that ("sanity checks", {
 
                expect_error (paretoconv (x=1, a=1, n=1.5), 
                              "n must be an integer")
-               expect_error (paretoconv (x=1, a=1, n=0), 
-                             "n must be an integer > 0")
+               expect_error (paretoconv (x=1, a=1, n=-1), 
+                             "n must be a non-negative integer")
                expect_error (paretoconv (x=-1, a=1, n=1), "x must be positive")
                expect_error (paretoconv (x=-1, a=1, n=-1), "x must be positive")
+})
+
+test_that ("n equals 0", {
+               expect_true (is.numeric (paretoconv (x=2, a=1, n=0)))
+               expect_true (is.numeric (paretoconv (x=2, a=1, n=0, cdf=TRUE)))
 })
 
 test_that("ramsay-int", {
