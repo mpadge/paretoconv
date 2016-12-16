@@ -1,4 +1,5 @@
 makefile
+/doc/*.*
 
 # vim files
 .*.un~

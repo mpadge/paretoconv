@@ -27,10 +27,11 @@ for *x>0*, *a>1* using the techniques devised by Colin Ramsay in
 
 The package contains only one function:
 ```
-paretoconv (x, a, n)
+paretoconv (x, a, n, cdf=FALSE)
 ```
 where `n` specifies the number of convolutions. Both this and `a` must be
-single-valued, while `x` can be a vector. 
+single-valued, while `x` can be a vector. `cdf` generates the cumulative
+distribution function, otherwise the probability density function is returned.
 
 -----
 
@@ -56,8 +57,6 @@ devtools::load_all (".")
 options(width=120)
 ```
 
------
-
 ### Usage
 
 ```{r usage}
@@ -65,7 +64,9 @@ library(paretoconv)
 packageVersion("paretoconv") 
 ```
 
-### Example
+-----
+
+## Example
 
 Solid lines in the figure below are a reproduction of Ramsay's (2006) Figure 2
 of probability density functions for the first 5 convolutions of the Pareto pdf
@@ -87,6 +88,7 @@ legend ("topright", lwd=1, col=cols, bty="n",
         legend=sapply (seq (n), function (i) paste0 ("n=", i)))
 ```
 ![](./fig/README-example.png)
+
 
 
 -----

@@ -11,9 +11,9 @@ An `R` package to calculate the *n*-fold convolution of Pareto distributions. *f
 
 The package contains only one function:
 
-    paretoconv (x, a, n)
+    paretoconv (x, a, n, cdf=FALSE)
 
-where `n` specifies the number of convolutions. Both this and `a` must be single-valued, while `x` can be a vector.
+where `n` specifies the number of convolutions. Both this and `a` must be single-valued, while `x` can be a vector. `cdf` generates the cumulative distribution function, otherwise the probability density function is returned.
 
 ------------------------------------------------------------------------
 
@@ -27,8 +27,6 @@ where `n` specifies the number of convolutions. Both this and `a` must be single
 devtools::install_github("mpadge/paretoconv")
 ```
 
-------------------------------------------------------------------------
-
 ### Usage
 
 ``` r
@@ -37,7 +35,10 @@ packageVersion("paretoconv")
 #> [1] '0.0.0'
 ```
 
-### Example
+------------------------------------------------------------------------
+
+Example
+-------
 
 Solid lines in the figure below are a reproduction of Ramsay's (2006) Figure 2 of probability density functions for the first 5 convolutions of the Pareto pdf with shape parameter of *a=5*. Dashed lines are analogous values for the non-integer value of *a=4.5*.
 
@@ -64,7 +65,7 @@ legend ("topright", lwd=1, col=cols, bty="n",
 
 ``` r
 date()
-#> [1] "Thu Dec 15 13:11:26 2016"
+#> [1] "Fri Dec 16 11:56:00 2016"
 testthat::test_dir("tests/")
 #> testthat results ========================================================================================================
 #> OK: 21 SKIPPED: 0 FAILED: 0
