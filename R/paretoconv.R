@@ -44,6 +44,7 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE)
     if (n%%1 != 0) stop ('n must be an integer')
     if (n < 0) stop ('n must be a non-negative integer')
 
+    fn <- "" # supress R CMD check warnings
     if (n == 0)
     {
         if (cdf)
@@ -54,15 +55,19 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE)
     {
         a <- a - 1 # Ramsay transforms to this value
         if (a%%1 == 0) 
+        {
             if (cdf)
-                y <- sapply (x, function (i) ramsay_int_cdf (i, a, n, x0))
+                fn <- "ramsay_int_cdf"
             else
-                y <- sapply (x, function (i) ramsay_int_pdf (i, a, n, x0))
+                fn <- "ramsay_int_pdf"
+        } else
+        {
+            if (cdf)
+                fn <- "ramsay_nonint_cdf"
             else
-                if (cdf)
-                    y <- sapply (x, function (i) ramsay_nonint_cdf (i, a, n, x0))
-                else
-                    y <- sapply (x, function (i) ramsay_nonint_pdf (i, a, n, x0))
+                fn <- "ramsay_nonint_pdf"
+        }
+        y <- sapply (x, function (i) do.call (fn, list (x=i, a=a, n=n, x0=x0)))
     }
 
     return (y)
