@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![codecov](https://codecov.io/gh/mpadge/paretoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv) [![Project Status: WIP](http://www.repostatus.org/badges/0.1.0/wip.svg)](http://www.repostatus.org/#wip) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv)
+[![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) [![Build status](https://ci.appveyor.com/api/projects/status/github/mpadge/paretoconv?svg=true)](https://ci.appveyor.com/project/mpadge/paretoconv) [![codecov](https://codecov.io/gh/mpadge/paretoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv) [![Project Status: WIP](http://www.repostatus.org/badges/0.1.0/wip.svg)](http://www.repostatus.org/#wip) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv)
 
 paretoconv
 ==========
@@ -65,7 +65,7 @@ legend ("topright", lwd=1, col=cols, bty="n",
 
 ``` r
 date()
-#> [1] "Fri Dec 16 11:56:00 2016"
+#> [1] "Wed Dec 21 11:29:55 2016"
 testthat::test_dir("tests/")
 #> testthat results ========================================================================================================
 #> OK: 21 SKIPPED: 0 FAILED: 0

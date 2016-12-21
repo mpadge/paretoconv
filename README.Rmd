@@ -8,6 +8,7 @@ knitr::opts_chunk$set(
 ```
 
 [![Build Status](https://travis-ci.org/mpadge/paretoconv.svg)](https://travis-ci.org/mpadge/paretoconv) 
+[![Build status](https://ci.appveyor.com/api/projects/status/github/mpadge/paretoconv?svg=true)](https://ci.appveyor.com/project/mpadge/paretoconv)
 [![codecov](https://codecov.io/gh/mpadge/paretoconv/branch/master/graph/badge.svg)](https://codecov.io/gh/mpadge/paretoconv)
 [![Project Status: WIP](http://www.repostatus.org/badges/0.1.0/wip.svg)](http://www.repostatus.org/#wip)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/paretoconv)](http://cran.r-project.org/web/packages/paretoconv) 
