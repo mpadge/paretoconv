@@ -103,17 +103,17 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, quiet=TRUE)
 #'
 #' @return Value for the CDF or PDF from the convolution of two Pareto
 #' distributions of shape a at the value x.
-asympt <- function (x, fn, a, n, x0, tol=1e-2, quiet=quiet)
+asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
 {
     indx <- sort (x, index.return=TRUE)$ix
     x <- x [indx]
     y <- rep (NA, length (x))
-    y [1] <- 1 - do.call (fn, list (x=x[1], a=a, x0=x0, n=n))
+    y [1] <- do.call (fn, list (x=x[1], a=a, x0=x0, n=n))
     dy <- 1
-    i <- 2
-    alph <- -a
+    alph <- a + 1 # because 1 has already been subtracted above
     if (grepl ("cdf", fn))
-        alph <- -a + 1
+        alph <- a
+    msg <- TRUE
     for (i in 2:length (x))
     {
         if (dy > tol)
@@ -121,10 +121,21 @@ asympt <- function (x, fn, a, n, x0, tol=1e-2, quiet=quiet)
         else # asymptotic approximation
             y [i] <- y [i-1] * (x [i] / x [i-1]) ^ (-alph)
 
-        dx <- x [i] / x [i-1] - 1
-        dy <- abs (y [i] / y [i-1] - dx ^ (-a + 1)) / dx
-        if (!quiet)
-            message ("iteration#", i-1, " (x, dy) = (", x [i], ", ", dy, ")")
+        dx <- x [i] / x [i-1]
+        if (y [i] == 0)
+            dy <- 0
+        else
+            dy <- abs (y [i] / y [i-1] - dx ^ (-alph)) / (dx - 1)
+
+        if (!quiet & msg)
+            message ("[", i-1, "/", length (x), "] (x, dy) = (", x [i], 
+                     ", ", dy, " > ", tol, ")")
+        if (dy < tol)
+        {
+            if (!quiet & msg)
+                message ("Converged to power-law tail")
+            msg <- FALSE
+        }
     }
     y [indx]
 }
