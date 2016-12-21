@@ -50,6 +50,7 @@ devtools::install_github("mpadge/paretoconv")
 devtools::load_all (".")
 #devtools::load_all (".", recompile=TRUE)
 #devtools::document (".")
+#devtools::check (".")
 #goodpractice::gp (".")
 #testthat::test_dir ("./tests/")
 ```

@@ -4,5 +4,6 @@
 ^README\.md$
 ^README\.html$
 ^makefile$
-^tmux-start.bash$
+^.tmux-start.bash$
+^appveyor.yml$
 ^fig

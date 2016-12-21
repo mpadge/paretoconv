@@ -6,13 +6,13 @@
 \alias{paretoconv-package}
 \title{paretoconv.}
 \usage{
-paretoconv(x, a, n, x0 = 1, cdf = FALSE)
+paretoconv(x, a, n, x0 = 1, cdf = FALSE, quiet = TRUE)
 }
 \arguments{
 \item{x}{value of independent variable (may be a vector)}
 
-\item{a}{The primary shape parameter of the Pareto distribution - alpha in
-Ramsay's notation (single value only)}
+\item{a}{The primary shape parameter of the Pareto distribution (single value
+only)}
 
 \item{n}{Number of convolutions (single value only)}
 
@@ -21,6 +21,8 @@ Ramsay's notation (single value only)}
 
 \item{cdf}{If TRUE, returns the cumulative distribution function, otherwise
 returns the probability density function.}
+
+\item{quiet}{If FALSE, issue progress messages}
 }
 \value{
 Value for the CDF or PDF from the convolution of two Pareto

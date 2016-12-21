@@ -18,6 +18,7 @@
 #' (generally obtained emprically with the poweRlaw package).
 #' @param cdf If TRUE, returns the cumulative distribution function, otherwise
 #' returns the probability density function.
+#' @param quiet If FALSE, issue progress messages
 #'
 #' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
 #' a and b are the primary and secondary shape parameters, respectively. It
@@ -29,7 +30,7 @@
 #' @export
 #' @examples 
 #' paretoconv (1:10, 1, 1)
-paretoconv <- function (x, a, n, x0=1, cdf=FALSE)
+paretoconv <- function (x, a, n, x0=1, cdf=FALSE, quiet=TRUE)
 {
     if (missing (x)) stop ('x must be supplied')
     if (missing (a)) stop ('a must be supplied')
@@ -67,8 +68,63 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE)
             else
                 fn <- "ramsay_nonint_pdf"
         }
-        y <- sapply (x, function (i) do.call (fn, list (x=i, a=a, n=n, x0=x0)))
+        # The value of 10 is arbitrary, but serves to implement aymptotic
+        # approximations for large x in longer vectors.
+        if (length (x) < 10)
+            y <- sapply (x, function (i) 
+                         do.call (fn, list (x=i, a=a, n=n, x0=x0)))
+        else
+        {
+            # aymptotic approximation
+            y <- asympt (x=x, fn=fn, a=a, n=n, x0=x0, quiet=quiet)
+        }
     }
 
     return (y)
+}
+
+#' Asymptotic approximation for large x
+#'
+#'
+#' @param x Vector of values of independent variable
+#' @param fn Name of function (int/nonint, pdf/cdf) as set in \code{paretoconv}
+#' @param a The primary shape parameter of the Pareto distribution (single value
+#' only)
+#' @param n Number of convolutions (single value only)
+#' @param x0 Lower cut-off point of classical heavy-tailed distribution
+#' (generally obtained emprically with the poweRlaw package).
+#' @param tol Convergence tolerance (values around 0.01 are typically
+#' sufficient; values < 0.001 may take a long time to converge).
+#' @param quiet If FALSE, issue progress messages
+#'
+#' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
+#' a and b are the primary and secondary shape parameters, respectively. It
+#' presumed here without loss of generality that b=1 and thus f(x)=a x^(1-a).
+#'
+#' @return Value for the CDF or PDF from the convolution of two Pareto
+#' distributions of shape a at the value x.
+asympt <- function (x, fn, a, n, x0, tol=1e-2, quiet=quiet)
+{
+    indx <- sort (x, index.return=TRUE)$ix
+    x <- x [indx]
+    y <- rep (NA, length (x))
+    y [1] <- 1 - do.call (fn, list (x=x[1], a=a, x0=x0, n=n))
+    dy <- 1
+    i <- 2
+    alph <- -a
+    if (grepl ("cdf", fn))
+        alph <- -a + 1
+    for (i in 2:length (x))
+    {
+        if (dy > tol)
+            y [i] <- do.call (fn, list (x=x[i], a=a, x0=x0, n=n))
+        else # asymptotic approximation
+            y [i] <- y [i-1] * (x [i] / x [i-1]) ^ (-alph)
+
+        dx <- x [i] / x [i-1] - 1
+        dy <- abs (y [i] / y [i-1] - dx ^ (-a + 1)) / dx
+        if (!quiet)
+            message ("iteration#", i-1, " (x, dy) = (", x [i], ", ", dy, ")")
+    }
+    y [indx]
 }

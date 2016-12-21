@@ -29,9 +29,10 @@ chi <- function (z, a, n)
 
 #' CDF for Convolution of Pareto distributions for non-integer alpha
 #'
-#' Convolutes multiple Pareto distributions following 'The Distribution of Sums
-#' of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' by Colin
-#' Ramsay (Communications in Statistics - Theory and Methods 37:2177-2184,
+#' Calculates complementary Cumulative Distribution Function (cdf) from
+#' convolution of multiple Pareto distributions following 'The Distribution of
+#' Sums of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' by
+#' Colin Ramsay (Communications in Statistics - Theory and Methods 37:2177-2184,
 #' 2008).
 #'
 #' This evaluates Eq. (9) via Eqs. (6), (8), and (12).
@@ -54,14 +55,15 @@ ramsay_nonint_cdf <- function (x, a, n, x0)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n) 
         (1 - exp (-x * z / x0)) * Re (chi (z, a, n)) / z
-    calc_integral (integrand, x, a, n)
+    1 - calc_integral (integrand, x, a, n)
 }
 
 #' PDF for Convolution of Pareto distributions for non-integer alpha
 #'
-#' Convolutes multiple Pareto distributions following 'The Distribution of Sums
-#' of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' by Colin
-#' Ramsay (Communications in Statistics - Theory and Methods 37:2177-2184,
+#' Calculates complementary Cumulative Distribution Function (cdf) from
+#' convolution of multiple Pareto distributions following 'The Distribution of
+#' Sums of I.I.D. Pareto Random Variables with Arbitrary Shape Parameter' by
+#' Colin Ramsay (Communications in Statistics - Theory and Methods 37:2177-2184,
 #' 2008).
 #'
 #' This evaluates Eq. (7) via Eqs. (6), (8), and (12).

@@ -37,10 +37,10 @@ phi16 <- function (z, a, n)
 
 #' CDF for Convolution of Pareto distributions for integer alpha
 #'
-#' Calculates Cumulative Distribution Function (cdf) from convolution of
-#' multiple Pareto distributions following 'The Distribution of Sums of Certain
-#' I.I.D. Pareto Variates' by Colin Ramsay (Communications in Statistics -
-#' Theory and Methods 35:395-405, 2006).
+#' Calculates complementary Cumulative Distribution Function (cdf) from
+#' convolution of multiple Pareto distributions following 'The Distribution of
+#' Sums of Certain I.I.D. Pareto Variates' by Colin Ramsay (Communications in
+#' Statistics - Theory and Methods 35:395-405, 2006).
 #'
 #' This is a combination of Eqs. (9), (13), and (14), with (13) actually
 #' evaluated in the form of (16).
@@ -67,7 +67,7 @@ ramsay_int_cdf <- function (x, a, n, x0)
             ret <- 0
         return (ret)
     }
-    calc_integral (integrand, x, a, n, incr=10, rough=TRUE)
+    1 - calc_integral (integrand, x, a, n, incr=10, rough=TRUE)
 }
 
 #' PDF for Convolution of Pareto distributions for integer alpha
