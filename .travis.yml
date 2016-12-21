@@ -1,6 +1,33 @@
 language: R
+warnings_are_errors: true
 sudo: false
 cache: packages
+
+matrix:
+    include:
+        - r: release
+          env: DEPS=cran
+          os: linux
+        - r: release
+          env: DEPS=cran
+          os: osx
+        - r: oldrel
+          env: DEPS=cran
+          os: linux
+        - r: oldrel
+          env: DEPS=cran
+          os: osx
+          #- r: devel
+          #env: DEPS=cran
+          #os: linux
+          #- r: devel
+          #env: DEPS=cran
+          #os: osx
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
 
 r_github_packages:
       - jimhester/covr
