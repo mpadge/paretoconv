@@ -41,3 +41,8 @@ test_that("ramsay-nonint", {
               expect_true (is.numeric (paretoconv (x=2, a=0.5, n=1, cdf=TRUE)))
               expect_true (length (paretoconv (x=2:4, a=0.5, n=1)) == 3)
 })
+
+test_that("asymp", {
+              expect_true (length (paretoconv (x=1:11, a=1, n=1)) == 11)
+              expect_message (paretoconv (x=1:11, a=1, n=1, quiet=FALSE))
+})
