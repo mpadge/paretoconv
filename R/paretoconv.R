@@ -128,14 +128,18 @@ asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
             dy <- abs (y [i] / y [i-1] - dx ^ (-alph)) / (dx - 1)
 
         if (!quiet & msg)
-            message ("[", i-1, "/", length (x), "] (x, dy) = (", x [i], 
-                     ", ", dy, " > ", tol, ")")
+            message ("\rnot converged to asymptotic tail at x [", i-1, 
+                     "/", length (x), "] = ", x [i], "; dy = ", 
+                     formatC (dy, format="f", digits=3), " > ", tol, appendLF=FALSE)
         if (dy < tol)
         {
             if (!quiet & msg)
-                message ("Converged to power-law tail")
+                message ("\rconverged to asymptotic tail at x [", i-1, 
+                         "/", length (x), "] = ", x [i], "; dy = ", 
+                         formatC (dy, format="f", digits=3), " < ", tol, "             ")
             msg <- FALSE
         }
     }
+    if (msg) message ("") # line feed
     y [indx]
 }
