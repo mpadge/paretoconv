@@ -2,5 +2,9 @@
 
 export(compare_conv_distributions)
 export(paretoconv)
+importFrom(VGAM,zeta)
 importFrom(cubature,adaptIntegrate)
 importFrom(fAsianOptions,kummerM)
+importFrom(methods,is)
+importFrom(stats,pnorm)
+importFrom(stats,sd)
