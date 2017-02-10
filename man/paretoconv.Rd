@@ -4,6 +4,7 @@
 \name{paretoconv}
 \alias{paretoconv}
 \alias{paretoconv-package}
+\alias{paretoconv}
 \title{paretoconv.}
 \usage{
 paretoconv(x, a, n, x0 = 1, cdf = FALSE, quiet = TRUE)
@@ -52,4 +53,3 @@ paretoconv (1:10, 1, 1)
 \author{
 Mark Padgham
 }
-
