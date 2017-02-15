@@ -13,6 +13,7 @@ Imports:
     cubature,
     fAsianOptions,
     methods,
+    poweRlaw,
     stats,
     VGAM
 Suggests:

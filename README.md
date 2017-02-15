@@ -24,14 +24,14 @@ where `n` specifies the number of convolutions. Both this and `a` must be single
 ### Installation
 
 ``` r
-devtools::install_github("mpadge/paretoconv")
+devtools::install_github('mpadge/paretoconv')
 ```
 
 ### Usage
 
 ``` r
 library(paretoconv)
-packageVersion("paretoconv") 
+packageVersion('paretoconv') 
 #> [1] '0.0.0'
 ```
 
@@ -48,13 +48,13 @@ n <- 1:5
 yint <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
 ynon <- lapply (n, function (i) paretoconv (x=x, a=4.5, n=i))
 cols <- rainbow (length (n))
-plot (NULL, NULL, xlim=range (x), ylim=range (yint, na.rm=TRUE), xlab="x", ylab="p")
+plot (NULL, NULL, xlim=range (x), ylim=range (yint, na.rm=TRUE), xlab='x', ylab='p')
 for (i in n) {
     lines (x, yint [[i]], col=cols [i])
     lines (x, ynon [[i]], col=cols [i], lty=2)
 }
-legend ("topright", lwd=1, col=cols, bty="n", 
-        legend=sapply (seq (n), function (i) paste0 ("n=", i)))
+legend ('topright', lwd=1, col=cols, bty='n', 
+        legend=sapply (seq (n), function (i) paste0 ('n=', i)))
 ```
 
 ![](./fig/README-example.png)
@@ -65,10 +65,10 @@ legend ("topright", lwd=1, col=cols, bty="n",
 
 ``` r
 date()
-#> [1] "Wed Dec 21 11:29:55 2016"
-testthat::test_dir("tests/")
-#> testthat results ========================================================================================================
-#> OK: 21 SKIPPED: 0 FAILED: 0
+#> [1] "Wed Feb 15 17:11:41 2017"
+testthat::test_package ('paretoconv')
+#> compare-distributions: .......
+#> paretoconv: .......................
 #> 
 #> DONE ===================================================================================================================
 ```

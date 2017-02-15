@@ -24,7 +24,7 @@ dpldis_paretoconv <- function(x, xmin, alpha) {
 #' @export
 #' @examples
 #' \dontrun{
-#' data ("native_american", package="poweRlaw")
+#' data ('native_american', package='poweRlaw')
 #' m1 <- displ$new(native_american$Cas)
 #' m1$setXmin (3)
 #' m1$setPars (estimate_pars(m1))
@@ -34,19 +34,21 @@ dpldis_paretoconv <- function(x, xmin, alpha) {
 #' }
 compare_conv_distributions <- function (d1, d2) 
 {
-    if (!is (d2, "displ"))
-        stop ("Second argument must be a powerLaw::displ")
+    if (missing (d1) | missing (d2))
+        stop ('Two distributions must be provided')
+    if (!is (d1, 'displ'))
+        stop ('First argument must be a poweRlaw displ object')
+    if (!is.numeric (d2))
+        stop ('Second argument must be a vector')
 
-    xs <- sort (d2$getDat ())
+    xs <- sort (d1$getDat ())
     x <- unique (xs)
-    if (!is.numeric (d1))
-        stop ("First argument must be a vector")
-    if (length (d1) != length (x))
-        stop ("Length of second argument does not correspond to data in first argument")
-    d1 <- log (d1 [match (xs, x)])
+    if (length (d2) != length (x))
+        stop ('Length of second argument does not correspond to data in first argument')
+    d2 <- log (d2 [match (xs, x)])
 
-    d2 <- dpldis_paretoconv (xs, d2$getXmin (), d2$getPars ())
-    ll_ratio_pts <- d1 - d2
+    d1 <- dpldis_paretoconv (xs, d1$getXmin (), d1$getPars ())
+    ll_ratio_pts <- d2 - d1 # NOTE: d2 is first!
     m <- mean (ll_ratio_pts [is.finite (ll_ratio_pts)])
     s <- sd (ll_ratio_pts [is.finite (ll_ratio_pts)])
     v <- sqrt (length (ll_ratio_pts)) * m / s
@@ -56,6 +58,47 @@ compare_conv_distributions <- function (d1, d2)
 
     l <- list (test_statistic = v, p_one_sided = 1 - p1, p_two_sided=p2, 
               ratio = data.frame (x=xs, ratio=ll_ratio_pts))
-    class(l) <- "compare_distributions"
+    class(l) <- 'compare_distributions'
     return(l)
+}
+
+#' Calculates integral of probability density functions for convoluted Pareto
+#' distributions
+#'
+#' @param a Shape parameter of Pareto disitribution
+#' @param x0 Lower cut-off for classic Pareto distribution
+#' @param n Number of convolutions
+#' @param x0lim If TRUE, integral is calculated only for values of \code{x>=x0}.
+#' @param tol Convergence tolerance for calculation of integral
+#' @param quiet If FALSE, progress is displayed as screen output
+#'
+#' @note This function can take a long time to execute!
+#'
+#' @export
+#' @examples
+#' pdf_integral (a=2.1, x0=5, n=0)
+pdf_integral <- function (a, x0=1, n=0, x0lim=FALSE, tol=1e-4, quiet=TRUE)
+{
+    if (missing (a)) stop ('Value of a must be given')
+
+    di <- int_old <- 999
+    x <- 1
+    if (x0lim) x <- x0
+    y <- paretoconv (x=x, a=a, x0=x0, n=n, cdf=FALSE, quiet=FALSE) 
+    while (di > tol)
+    {
+        x <- x + 1
+        y <- c (y, paretoconv (x=x, a=a, x0=x0, n=n, cdf=FALSE, quiet=FALSE))
+        # trapezoidal integration 
+        int <- sum (y [c (1, length (y))] / 2) + sum (y [2:(length (y) - 1)])
+        di <- abs (int - int_old) / int_old
+        int_old <- int
+        if (!quiet)
+            message ('\r[', x, '] (int, di) = (', int, ', ', di, ') > ', 
+                     tol, '     ', appendLF=FALSE)
+    }
+    if (!quiet) 
+            message ('\r[', x, '] (int, di) = (', int, ', ', di, ') < ', 
+                     tol, '     ')
+    return (int)
 }

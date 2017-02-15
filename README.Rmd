@@ -43,16 +43,16 @@ distribution function, otherwise the probability density function is returned.
 ### Installation
 
 ```{r git-install, eval=FALSE}
-devtools::install_github("mpadge/paretoconv")
+devtools::install_github('mpadge/paretoconv')
 ```
 
 ```{r install, echo=FALSE, message=FALSE}
-devtools::load_all (".")
-#devtools::load_all (".", recompile=TRUE)
-#devtools::document (".")
-#devtools::check (".")
-#goodpractice::gp (".")
-#testthat::test_dir ("./tests/")
+devtools::load_all ('.')
+#devtools::load_all ('.', recompile=TRUE)
+#devtools::document ('.')
+#devtools::check ('.')
+#goodpractice::gp ('.')
+#testthat::test_package ('paretoconv')
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
@@ -63,7 +63,7 @@ options(width=120)
 
 ```{r usage}
 library(paretoconv)
-packageVersion("paretoconv") 
+packageVersion('paretoconv') 
 ```
 
 -----
@@ -81,13 +81,13 @@ n <- 1:5
 yint <- lapply (n, function (i) paretoconv (x=x, a=5, n=i))
 ynon <- lapply (n, function (i) paretoconv (x=x, a=4.5, n=i))
 cols <- rainbow (length (n))
-plot (NULL, NULL, xlim=range (x), ylim=range (yint, na.rm=TRUE), xlab="x", ylab="p")
+plot (NULL, NULL, xlim=range (x), ylim=range (yint, na.rm=TRUE), xlab='x', ylab='p')
 for (i in n) {
     lines (x, yint [[i]], col=cols [i])
     lines (x, ynon [[i]], col=cols [i], lty=2)
 }
-legend ("topright", lwd=1, col=cols, bty="n", 
-        legend=sapply (seq (n), function (i) paste0 ("n=", i)))
+legend ('topright', lwd=1, col=cols, bty='n', 
+        legend=sapply (seq (n), function (i) paste0 ('n=', i)))
 ```
 ![](./fig/README-example.png)
 
@@ -99,5 +99,5 @@ legend ("topright", lwd=1, col=cols, bty="n",
 
 ```{r test, eval=TRUE}
 date()
-testthat::test_dir("tests/")
+testthat::test_package ('paretoconv')
 ```
