@@ -34,7 +34,7 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
     if (rough)
         val_old <- do.call (f, list (z=upper, x=x, a=a, n=n))
     else
-        val_old <- cubature::adaptIntegrate (f, lowerLimit=0, upperLimit=upper,
+        val_old <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
                                              x=x, a=a, n=n)$integral
     maxiter <- 1e3
     niter <- 1
@@ -44,7 +44,7 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
         if (rough)
             val <- do.call (f, list (z=upper, x=x, a=a, n=n))
         else
-            val <- cubature::adaptIntegrate (f, lowerLimit=0, upperLimit=upper,
+            val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
                                              x=x, a=a, n=n)$integral
         if (abs (val) < tol)
             chng <- 0 # will stop loop at first instance, so will never / 0
@@ -56,7 +56,7 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
     if (niter >= maxiter)
         warning ("Integral did not converge!")
     if (rough)
-        val <- cubature::adaptIntegrate (f, lowerLimit=0, upperLimit=upper, 
+        val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper, 
                                          x=x, a=a, n=n)$integral
     return (val)
 }

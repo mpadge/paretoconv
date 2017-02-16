@@ -3,7 +3,7 @@
 #' @name paretoconv
 #' @docType package
 #' @author Mark Padgham
-#' @importFrom cubature adaptIntegrate
+#' @importFrom cubature hcubature
 #' @importFrom fAsianOptions kummerM
 #' @importFrom methods is
 #' @importFrom poweRlaw displ
