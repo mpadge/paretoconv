@@ -90,7 +90,6 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
 
 #' Asymptotic approximation for large x
 #'
-#'
 #' @param x Vector of values of independent variable
 #' @param fn Name of function (int/nonint, pdf/cdf) as set in \code{paretoconv}
 #' @param a The primary shape parameter of the Pareto distribution (single value
@@ -148,4 +147,44 @@ asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
     }
     if (!quiet & msg) message ("") # line feed
     y [indx]
+}
+
+#' Get limit of asymptotic convergence
+#'
+#' @param a The primary shape parameter of the Pareto distribution (single value
+#' only)
+#' @param n Number of convolutions (single value only)
+#' @param x0 Lower cut-off point of classical heavy-tailed distribution
+#' (generally obtained emprically with the poweRlaw package).
+#' @param tol Convergence tolerance (values around 0.05 are typically
+#' sufficient; values < 0.01 will generally not work).
+#' @param quiet If FALSE, issue progress messages
+#'
+#' @return Single integer value of limit beyond which PDF may be approximated by
+#' its asymptotic power law
+#' @export
+get_asymp_limit <- function (a, n, x0, tol=0.05, quiet=FALSE)
+{
+    # NOTE: The point of asymptotic convergence is approached by multiplying
+    # each value of `x` by `(1 + dy)`, so that `x` increases by less as the
+    # convergence point is approached. This is necessary because increasing `x`
+    # too rapidly leads to `paretoconv()` returning `y=0`, and so `dy` becomes
+    # undefined.
+    x <- 1:2
+    dy <- 1
+    while (dy > tol)
+    {
+        y <- paretoconv (x, a=alpha, x0=x0, n=n, cdf=FALSE)
+        dx <- x [2] / x [1]
+        dy <- abs (y [2] / y [1] - dx ^ (-a)) / (dx - 1)
+        if (any (y == 0)) dy <- 0
+        if (!quiet & dy > tol)
+            message ('\rdy [x = ', round (x [1]), '] = ', dy, ' > ', tol,
+                     appendLF=FALSE)
+        x [1] <- x [1] * (1 + dy)
+        x [2] <- x [1] + 1
+    }
+    if (!quiet)
+        message ('\rdy [x = ', round (x [1]), '] = ', dy, ' < ', tol)
+    return (x [1])
 }
