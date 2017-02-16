@@ -18,6 +18,9 @@
 #' (generally obtained emprically with the poweRlaw package).
 #' @param cdf If TRUE, returns the cumulative distribution function, otherwise
 #' returns the probability density function.
+#' @param asymp If TRUE and \code{x} is a vector of 10 or more elements,
+#' asymptotic convergence is checked for large \code{x}, with values beyond
+#' convergence replaced with directly power-law values
 #' @param quiet If FALSE, issue progress messages
 #'
 #' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
@@ -32,7 +35,7 @@
 #' @export
 #' @examples 
 #' paretoconv (x=1:10, a=2, n=0)
-paretoconv <- function (x, a, n, x0=1, cdf=FALSE, quiet=TRUE)
+paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
 {
     if (missing (x)) stop ('x must be supplied')
     if (missing (a)) stop ('a must be supplied')
@@ -72,7 +75,7 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, quiet=TRUE)
         }
         # The value of 10 is arbitrary, but serves to implement aymptotic
         # approximations for large x in longer vectors.
-        if (length (x) < 10)
+        if (length (x) < 10 | !asymp)
             y <- sapply (x, function (i) 
                          do.call (fn, list (x=i, a=a, n=n, x0=x0)))
         else

@@ -7,7 +7,7 @@
 \alias{paretoconv}
 \title{paretoconv.}
 \usage{
-paretoconv(x, a, n, x0 = 1, cdf = FALSE, quiet = TRUE)
+paretoconv(x, a, n, x0 = 1, cdf = FALSE, asymp = TRUE, quiet = TRUE)
 }
 \arguments{
 \item{x}{value of independent variable (may be a vector)}
@@ -22,6 +22,10 @@ only)}
 
 \item{cdf}{If TRUE, returns the cumulative distribution function, otherwise
 returns the probability density function.}
+
+\item{asymp}{If TRUE and \code{x} is a vector of 10 or more elements,
+asymptotic convergence is checked for large \code{x}, with values beyond
+convergence replaced with directly power-law values}
 
 \item{quiet}{If FALSE, issue progress messages}
 }
