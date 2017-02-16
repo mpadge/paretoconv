@@ -146,6 +146,6 @@ asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
             msg <- FALSE
         }
     }
-    if (msg) message ("") # line feed
+    if (!quiet & msg) message ("") # line feed
     y [indx]
 }
