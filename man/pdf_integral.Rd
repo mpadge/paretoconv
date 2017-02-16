@@ -5,8 +5,7 @@
 \title{Calculates integral of probability density functions for convoluted Pareto
 distributions}
 \usage{
-pdf_integral(a, x0 = 1, n = 0, x0lim = FALSE, tol = 0.0001,
-  quiet = TRUE)
+pdf_integral(a, x0 = 1, n = 0, x0lim = FALSE, quiet = TRUE)
 }
 \arguments{
 \item{a}{Shape parameter of Pareto disitribution}
@@ -16,8 +15,6 @@ pdf_integral(a, x0 = 1, n = 0, x0lim = FALSE, tol = 0.0001,
 \item{n}{Number of convolutions}
 
 \item{x0lim}{If TRUE, integral is calculated only for values of \code{x>=x0}.}
-
-\item{tol}{Convergence tolerance for calculation of integral}
 
 \item{quiet}{If FALSE, progress is displayed as screen output}
 }
