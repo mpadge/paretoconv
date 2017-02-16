@@ -23,7 +23,7 @@ test_that ('compare_conv_distributions', {
 })
 
 test_that ('pdf-integrals', {
-    res <- pdf_integral (a=2.5, x0=7, n=0, tol=1e-3)
+    res <- pdf_integral (a=2.5, x0=7, n=0)
     expect_is (res, 'numeric')
     expect_length (res, 1)
 })

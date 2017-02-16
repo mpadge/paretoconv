@@ -174,7 +174,7 @@ get_asymp_limit <- function (a, n, x0, tol=0.05, quiet=FALSE)
     dy <- 1
     while (dy > tol)
     {
-        y <- paretoconv (x, a=alpha, x0=x0, n=n, cdf=FALSE)
+        y <- paretoconv (x, a=a, x0=x0, n=n, cdf=FALSE)
         dx <- x [2] / x [1]
         dy <- abs (y [2] / y [1] - dx ^ (-a)) / (dx - 1)
         if (any (y == 0)) dy <- 0

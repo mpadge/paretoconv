@@ -113,6 +113,6 @@ pdf_integral <- function (a, x0=1, n=0, x0lim=FALSE, quiet=TRUE)
     # And note here that pracma::integral() is much slower than the standard
     # integrate function, and that cubature::hcubature() (the re-named version
     # of adaptIntegrat()) actually doesn't even work for paretoconv.
-    integrate (f, lower=lower, upper=Inf, a=alpha, x0=x0, n=n, 
+    integrate (f, lower=lower, upper=Inf, a=a, x0=x0, n=n, 
                xlim=xlim, ylim=ylim)$value
 }
