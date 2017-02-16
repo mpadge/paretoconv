@@ -124,6 +124,7 @@ asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
             y [i] <- y [i-1] * (x [i] / x [i-1]) ^ (-alph)
 
         dx <- x [i] / x [i-1]
+        if (x [i-1] == 0) dx <- 1 # in case x [1] == 0
         if (y [i] == 0)
             dy <- 0
         else
