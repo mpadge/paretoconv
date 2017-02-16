@@ -1,5 +1,5 @@
 # discrete power law distribution, directly cribbed from poweRlaw
-dpldis_paretoconv <- function(x, xmin, alpha) {
+dpldis_paretoconv <- function (x, xmin, alpha) {
     #x <- x [round (x) >= round (xmin)]
     xmin <- floor (xmin)
     constant <- VGAM::zeta (alpha)

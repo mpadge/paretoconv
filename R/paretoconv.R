@@ -23,13 +23,15 @@
 #' @note The Pareto distribution may be defined as f(x)=(a/b)(b/x)^(a-1), where
 #' a and b are the primary and secondary shape parameters, respectively. It
 #' presumed here without loss of generality that b=1 and thus f(x)=a x^(1-a).
+#' Convolution of multiple distritions (that is, \code{n>0}) are NOT normalised,
+#' so CDFs to not sum to unity, and PDFs do not integrate to unity.
 #'
 #' @return Value for the CDF or PDF from the convolution of two Pareto
 #' distributions of shape a at the value x.
 #'
 #' @export
 #' @examples 
-#' paretoconv (1:10, 1, 1)
+#' paretoconv (x=1:10, a=2, n=0)
 paretoconv <- function (x, a, n, x0=1, cdf=FALSE, quiet=TRUE)
 {
     if (missing (x)) stop ('x must be supplied')
