@@ -26,4 +26,8 @@ test_that ('pdf-integrals', {
     res <- pdf_integral (a=2.5, x0=7, n=0)
     expect_is (res, 'numeric')
     expect_length (res, 1)
+    res2 <- pdf_integral (a=2.5, x0=7, n=0, discrete=FALSE)
+    expect_is (res, 'numeric')
+    expect_length (res, 1)
+    expect_false (res == res2)
 })
