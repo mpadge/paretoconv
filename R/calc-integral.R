@@ -35,28 +35,49 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
         val_old <- do.call (f, list (z=upper, x=x, a=a, n=n))
     else
         val_old <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                             x=x, a=a, n=n)$integral
-    maxiter <- 1e3
-    niter <- 1
-    while (chng > tol && niter < maxiter)
+                                        x=x, a=a, n=n)$integral
+    if (!is.nan (val_old))
     {
-        upper <- upper * (1 + incr)
+        # increase upper limit until tolerance reached
+        maxiter <- 1e3
+        niter <- 1
+        while (chng > tol && niter < maxiter)
+        {
+            upper <- upper * (1 + incr)
+            if (rough)
+                val <- do.call (f, list (z=upper, x=x, a=a, n=n))
+            else
+                val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
+                                                 x=x, a=a, n=n)$integral
+            if (is.nan (val))
+            {
+                upper <- upper / (1 + incr)
+                break
+            } else
+            {
+                if (abs (val) < tol)
+                    chng <- 0 # will stop loop at first instance, so will never / 0
+                else
+                    chng <- abs (val - val_old) / val_old
+                val_old <- val
+                niter <- niter + 1
+            }
+        }
+        if (niter >= maxiter)
+            warning ("Integral did not converge!")
         if (rough)
-            val <- do.call (f, list (z=upper, x=x, a=a, n=n))
-        else
+            val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper, 
+                                        x=x, a=a, n=n)$integral
+    } else
+    {
+        # value at upper limit undefined, so decrease until defined value
+        val <- NaN
+        while (is.nan (val))
+        {
+            upper <- upper / (1 + incr)
             val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                             x=x, a=a, n=n)$integral
-        if (abs (val) < tol)
-            chng <- 0 # will stop loop at first instance, so will never / 0
-        else
-            chng <- abs (val - val_old) / val_old
-        val_old <- val
-        niter <- niter + 1
+                                            x=x, a=a, n=n)$integral
+        }
     }
-    if (niter >= maxiter)
-        warning ("Integral did not converge!")
-    if (rough)
-        val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper, 
-                                         x=x, a=a, n=n)$integral
     return (val)
 }
