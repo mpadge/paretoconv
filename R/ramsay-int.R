@@ -67,7 +67,10 @@ ramsay_int_cdf <- function (x, a, n, x0)
             ret <- 0
         return (ret)
     }
-    1 - calc_integral (integrand, x, a, n, incr=10, rough=TRUE)
+    if (x == 0)
+        1
+    else
+        1 - calc_integral (integrand, x, a, n, incr=10, rough=TRUE)
 }
 
 #' PDF for Convolution of Pareto distributions for integer alpha
@@ -102,5 +105,8 @@ ramsay_int_pdf <- function (x, a, n, x0)
             ret <- exp (-x * z / (n * x0)) * phi16 (z / n, a, n)
         return (ret)
     }
-    calc_integral (integrand, x, a, n, incr=10, rough=TRUE) / (n * x0)
+    if (x == 0)
+        0
+    else
+        calc_integral (integrand, x, a, n, incr=10, rough=TRUE) / (n * x0)
 }

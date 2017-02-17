@@ -55,7 +55,10 @@ ramsay_nonint_cdf <- function (x, a, n, x0)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n) 
         (1 - exp (-x * z / x0)) * Re (chi (z, a, n)) / z
-    1 - calc_integral (integrand, x, a, n)
+    if (x == 0)
+        1
+    else
+        1 - calc_integral (integrand, x, a, n)
 }
 
 #' PDF for Convolution of Pareto distributions for non-integer alpha
@@ -86,5 +89,8 @@ ramsay_nonint_pdf <- function (x, a, n, x0)
     # F_n(x), and the integral is over z-values
     integrand <- function (z, x, a, n)
         exp (-x * z / x0) * Re (chi (z, a, n))
-    calc_integral (integrand, x, a, n)
+    if (x == 0)
+        0
+    else
+        calc_integral (integrand, x, a, n)
 }
