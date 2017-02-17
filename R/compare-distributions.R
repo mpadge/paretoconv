@@ -68,51 +68,63 @@ compare_conv_distributions <- function (d1, d2)
 #' @param a Shape parameter of Pareto disitribution
 #' @param x0 Lower cut-off for classic Pareto distribution
 #' @param n Number of convolutions
-#' @param x0lim If TRUE, integral is calculated only for values of \code{x>=x0}.
+#' @param discrete Calculate integral for discrete (TRUE) or continuous (FALSE)
+#' probability density function
+#' @param xmin Lower limit of integral (generally 0, 1, or x0)
 #' @param quiet If FALSE, progress is displayed as screen output
 #'
-#' @note This function can take a long time to execute!
+#' @note Values for discrete integrals differ from values from continuous
+#' integrals. This function can also take a long time to execute, particularly
+#' for continuous integrals.
 #'
 #' @export
 #' @examples
 #' pdf_integral (a=2.1, x0=5, n=0)
-pdf_integral <- function (a, x0=1, n=0, x0lim=FALSE, quiet=TRUE)
+pdf_integral <- function (a, x0=1, n=0, discrete=TRUE, xmin=0, quiet=TRUE)
 {
     if (missing (a)) stop ('Value of a must be given')
 
-    lower <- 0
-    if (x0lim)
-        lower <- x0
-    else if (n == 0)
+    if (n == 0 & xmin == 0)
     {
         if (!quiet)
             message ('Integrating from lower limit of 1 for n=0')
-        lower <- 1
+        xmin <- 1
     }
 
-    if (!quiet)
-        message ('Getting asymptotic limit for convergence to power law')
-    xlim <- get_asymp_limit (a=a, x0=x0, n=n, quiet=quiet)
-    ylim <- paretoconv (x=xlim, a=a, x0=x0, n=n, cdf=FALSE)
-
-    # Then a function needs to be defined for the integration
-    f <- function (x, a, x0, n, xlim, ylim)
+    if (discrete)
     {
-        y <- x
-        indx1 <- which (x < xlim)
-        indx2 <- which (x >= xlim)
-        if (length (indx1) > 0)
-            y [indx1] <- paretoconv (x [indx1], a=a, x0=x0, n=n, asymp=FALSE)
-        if (length (indx2) > 0)
-            y [indx2] <- ylim * (x [indx2] / xlim) ^ (-a)
-        return (y)
-    }
+        nx <- 1e5
+        x <- x0:nx
+        y <- paretoconv (x, a=a, x0=x0, n=n, cdf=FALSE, asymp=TRUE, quiet=quiet)
+        ret <- (y [1] + y [length (y)]) / 2 + sum (y [2:(length (y) - 1)])
+    } else
+    {
+        if (!quiet)
+            message ('Getting asymptotic limit for convergence to power law')
+        xlim <- get_asymp_limit (a=a, x0=x0, n=n, quiet=quiet)
+        ylim <- paretoconv (x=xlim, a=a, x0=x0, n=n, cdf=FALSE)
 
-    if (!quiet)
-        message ('Calculating integral')
-    # And note here that pracma::integral() is much slower than the standard
-    # integrate function, and that cubature::hcubature() (the re-named version
-    # of adaptIntegrat()) actually doesn't even work for paretoconv.
-    integrate (f, lower=lower, upper=Inf, a=a, x0=x0, n=n, 
-               xlim=xlim, ylim=ylim)$value
+        # Then a function needs to be defined for the integration
+        f <- function (x, a, x0, n, xlim, ylim)
+        {
+            y <- x
+            indx1 <- which (x < xlim)
+            indx2 <- which (x >= xlim)
+            if (length (indx1) > 0)
+                y [indx1] <- paretoconv (x [indx1], a=a, x0=x0, n=n, asymp=FALSE)
+            if (length (indx2) > 0)
+                y [indx2] <- ylim * (x [indx2] / xlim) ^ (-a)
+            return (y)
+        }
+
+        if (!quiet)
+            message ('Calculating integral')
+
+        # And note here that pracma::integral() is much slower than the standard
+        # integrate function, and that cubature::hcubature() (the re-named
+        # version of adaptIntegrat()) actually doesn't even work for paretoconv.
+        ret <- integrate (f, lower=xmin, upper=Inf, a=a, x0=x0, n=n, 
+                          xlim=xlim, ylim=ylim)$value
+    }
+    return (ret)
 }

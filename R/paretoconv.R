@@ -186,5 +186,5 @@ get_asymp_limit <- function (a, n, x0, tol=0.05, quiet=FALSE)
     }
     if (!quiet)
         message ('\rdy [x = ', round (x [1]), '] = ', dy, ' < ', tol)
-    return (x [1])
+    return (round (x [1]))
 }

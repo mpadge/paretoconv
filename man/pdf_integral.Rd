@@ -5,7 +5,8 @@
 \title{Calculates integral of probability density functions for convoluted Pareto
 distributions}
 \usage{
-pdf_integral(a, x0 = 1, n = 0, x0lim = FALSE, quiet = TRUE)
+pdf_integral(a, x0 = 1, n = 0, discrete = TRUE, xmin = 0,
+  quiet = TRUE)
 }
 \arguments{
 \item{a}{Shape parameter of Pareto disitribution}
@@ -14,7 +15,10 @@ pdf_integral(a, x0 = 1, n = 0, x0lim = FALSE, quiet = TRUE)
 
 \item{n}{Number of convolutions}
 
-\item{x0lim}{If TRUE, integral is calculated only for values of \code{x>=x0}.}
+\item{discrete}{Calculate integral for discrete (TRUE) or continuous (FALSE)
+probability density function}
+
+\item{xmin}{Lower limit of integral (generally 0, 1, or x0)}
 
 \item{quiet}{If FALSE, progress is displayed as screen output}
 }
@@ -23,7 +27,9 @@ Calculates integral of probability density functions for convoluted Pareto
 distributions
 }
 \note{
-This function can take a long time to execute!
+Values for discrete integrals differ from values from continuous
+integrals. This function can also take a long time to execute, particularly
+for continuous integrals.
 }
 \examples{
 pdf_integral (a=2.1, x0=5, n=0)
