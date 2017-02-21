@@ -71,7 +71,7 @@ pareto_optimise <- function (m, x0=1, n=1, quiet=TRUE)
         y [indx] <- y_old [indx_old]
         y [which (is.na (y))] <- sapply (which (is.na (y)), function (i)
                                          ks_dist (m, x0=x0vec [i], n=nvec [i]))
-        count <- count + 2
+        count <- count + 1
     }
     ret <- c (x0, n, min (y))
     names (ret) <- c ('x0', 'n', 'KS')
