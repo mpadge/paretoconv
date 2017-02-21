@@ -20,6 +20,7 @@ ks_dist <- function (m, x0, n, quiet=TRUE)
     max (abs (yfit - cdf))
 }
 
+
 #' Locally optimal fitting of convoluted Pareto distribution to observed data
 #'
 #' @param m A \code{poweRlaw::displ} object containing data to be modelled
@@ -59,7 +60,7 @@ pareto_optimise <- function (m, x0=1, n=1, quiet=TRUE)
         x0 <- x0vec [which.min (y)]
         n <- nvec [which.min (y)]
         if (!quiet)
-            message ('iteration#', count, ' -> (', x0, ', ', n, ')')
+            message ('iteration#', count, ' -> (x0, n) = (', x0, ', ', n, ')')
         x0vec_old <- x0vec
         nvec_old <- nvec
         x0vec <- rep ((x0 - 1):(x0 + 1), 3)
@@ -76,4 +77,140 @@ pareto_optimise <- function (m, x0=1, n=1, quiet=TRUE)
     ret <- c (x0, n, min (y))
     names (ret) <- c ('x0', 'n', 'KS')
     return (ret)
+}
+
+#' Generate one simulated paretoconv model
+#'
+#' @param m A \code{poweRlaw::displ} object containing data to be modelled
+#' @param x0 Initial guess for lower limit of Pareto distribution
+#' @param n Initial guess for number of convolutions
+#' @param quiet If FALSE, display progress messages on screen
+#'
+#' @return Position of the local optimum as quantified by \code{x0} and
+#' \code{n}, along with associated Kolmogorow-Smirnov statistic quantifying
+#' maximal distance from convoluted Pareto Cumulative Distribution Function
+#' (CDF) and empirical CDF of model \code{m}.
+sim_mod1 <- function (m, x0, n, quiet=TRUE)
+{
+    if (!is (m, 'displ'))
+        stop ('m must be a poweRlaw::displ object')
+
+    if (missing (x0) | missing (n))
+    {
+        dat <- pareto_optimise (m, x0=1, n=1, quiet=quiet)
+        x0 <- dat [1]
+        n <- dat [2]
+    }
+    a <- m$getPars ()
+    nx <- length (m$getDat ())
+    xt <- rep (0, nx)
+    for (i in 1:n)
+        xt <- xt + rplconv (n=nx, x0=x0, alpha=a)
+    xt <- floor (xt / n)
+    m2 <- displ$new (xt)
+    m2$setXmin (poweRlaw::estimate_xmin (m2))
+    pareto_optimise (m2, x0=x0, n=n, quiet=quiet)
+}
+
+#' Generate a series of simulated paretoconv models
+#'
+#' @param m A \code{poweRlaw::displ} object containing data to be modelled
+#' @param x0 Initial guess for lower limit of Pareto distribution
+#' @param n Initial guess for number of convolutions
+#' @param times Minimum number of times most successful model should be
+#' generated
+#' @param quiet If FALSE, display progress messages on screen
+#'
+#' @return Series of models specified by\code{x0} and \code{n}, along with
+#' numbers of times each of those models represented the optimal model
+sim_mod_series <- function (m, x0, n, times=4, quiet=TRUE)
+{
+    mods <- counts <- NULL
+    enough <- FALSE
+    if (!quiet)
+        message ('Generating models until same model appears ',
+                 times, ' times')
+    while (!enough)
+    {
+        mod <- sim_mod1 (m, x0=x0, n=n, quiet=quiet)
+        i <- which (mod [1] == mods [,1] & mod [2] == mods [,2])
+        if (length (i) == 0)
+        {
+            mods <- rbind (mods, mod [1:2])
+            counts <- c (counts, 1)
+        } else
+            counts [i] <- counts [i] + 1
+        if (max (counts) >= times)
+            enough <- TRUE
+    }
+    cbind (mods, counts)
+}
+
+#' Estimate Kolmogorov-Smirnov (KS) statistic for a single synthetic paretoconv
+#' model
+#'
+#' @param m A \code{poweRlaw::displ} object containing data to be modelled
+#' @param x0 Initial guess for lower limit of Pareto distribution
+#' @param n Initial guess for number of convolutions
+#' @param x0mod Equivalent value of \code{x0} for synthetic model
+#' @param nmod Equivalent value of \code{n} for synthetic model
+#'
+#' @return Single value of KS statistic
+ks1 <- function (m, x0, n, x0mod, nmod)
+{
+    a <- m$getPars ()
+    nx <- length (m$getDat ())
+    xt <- rep (0, nx)
+    for (i in 1:n)
+        xt <- xt + rplconv (n=nx, x0=x0, alpha=a)
+    xt <- floor (xt / n)
+    # Then the code from `ks_dist()`, include re-estimating a from simulated
+    # data
+    m2 <- poweRlaw::displ$new (xt)
+    m2$setXmin (poweRlaw::estimate_xmin (m2))
+    ks_dist (m2, x0=x0mod, n=nmod)
+}
+
+#' Estimate probability of observed KS statistic from synthetic models
+#'
+#' @param m A \code{poweRlaw::displ} object containing data to be modelled
+#' @param x0 Initial guess for lower limit of Pareto distribution
+#' @param n Initial guess for number of convolutions
+#' @param neach Number of test statistics to be generated for each different
+#' model
+#' @param quiet If FALSE, display progress messages on screen
+#'
+#' @return Single value representing probability of observing given value of
+#' \code{ks}
+#'
+#' @export
+pparetoconv <- function (m, x0, n, neach=10, quiet=TRUE)
+{
+    ks0 <- ks_dist (m=m, x0=x0, n=n)
+    if (!quiet)
+        message ('Generating simulated models')
+    mods <- sim_mod_series (m=m, x0=x0, n=n, quiet=quiet)
+    ksvals <- NULL
+    if (!quiet)
+        message ('Generating synthetic series from simulated models')
+    for (i in seq (nrow (mods)))
+    {
+        ni <- neach * mods [i, 3]
+        if (!quiet)
+            message ('mod [', mods [i, 1], ', ', mods [i, 2], '] ', 
+                     appendLF=FALSE)
+        for (j in seq (ni))
+        {
+            ksvals <- c (ksvals, 
+                         ks1 (m, x0=3, n=2, x0mod=mods [i, 1], nmod=mods [i, 2]))
+            if (!quiet)
+                message ('.', appendLF=FALSE)
+        }
+        if (!quiet)
+            message ('')
+    }
+    if (!quiet)
+        message ('Generated ', length (ksvals), ' synthetic KS statistics')
+    dk <- density (ksvals, n=2^16)
+    length (dk$y [dk$y > ks0]) / length (dk$y)
 }
