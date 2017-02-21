@@ -19,7 +19,7 @@
 #' of the integral.
 #'
 #' @return Single value of integral
-calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
+calc_integral <- function (f, x, a, x0, n, incr=0.1, rough=FALSE)
 {
     # Setting appropriate upper limits is very important because integrals in
     # these non-integer cases often diverge for high upper limits. An
@@ -32,10 +32,10 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
     chng <- 1
     upper <- 10 * x
     if (rough)
-        val_old <- do.call (f, list (z=upper, x=x, a=a, n=n))
+        val_old <- do.call (f, list (z=upper, x=x, a=a, x0=x0, n=n))
     else
         val_old <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                        x=x, a=a, n=n)$integral
+                                        x=x, a=a, x0=x0, n=n)$integral
     if (!is.nan (val_old))
     {
         # increase upper limit until tolerance reached
@@ -45,10 +45,10 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
         {
             upper <- upper * (1 + incr)
             if (rough)
-                val <- do.call (f, list (z=upper, x=x, a=a, n=n))
+                val <- do.call (f, list (z=upper, x=x, a=a, x0=x0, n=n))
             else
                 val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                                 x=x, a=a, n=n)$integral
+                                                 x=x, a=a, x0=x0, n=n)$integral
             if (is.nan (val))
             {
                 upper <- upper / (1 + incr)
@@ -67,7 +67,7 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
             warning ("Integral did not converge!")
         if (rough)
             val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper, 
-                                        x=x, a=a, n=n)$integral
+                                        x=x, a=a, x0=x0, n=n)$integral
     } else
     {
         # value at upper limit undefined, so decrease until defined value
@@ -76,7 +76,7 @@ calc_integral <- function (f, x, a, n, incr=0.1, rough=FALSE)
         {
             upper <- upper / (1 + incr)
             val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                            x=x, a=a, n=n)$integral
+                                            x=x, a=a, x0=x0, n=n)$integral
         }
     }
     return (val)
