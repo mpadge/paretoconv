@@ -19,7 +19,7 @@
 #' of the integral.
 #'
 #' @return Single value of integral
-calc_integral <- function (f, x, a, x0, n, incr=0.1, rough=FALSE)
+calc_integral <- function (f, x, a, x0, n, incr=0.01, rough=FALSE)
 {
     # Setting appropriate upper limits is very important because integrals in
     # these non-integer cases often diverge for high upper limits. An
@@ -30,7 +30,7 @@ calc_integral <- function (f, x, a, x0, n, incr=0.1, rough=FALSE)
     # Starting value is taken as 10 * x, increasing by incr each step.
     tol <- 1e-5
     chng <- 1
-    upper <- 10 * x
+    upper <- 2 * x
     if (rough)
         val_old <- do.call (f, list (z=upper, x=x, a=a, x0=x0, n=n))
     else
