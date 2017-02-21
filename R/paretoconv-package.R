@@ -7,6 +7,6 @@
 #' @importFrom fAsianOptions kummerM
 #' @importFrom methods is
 #' @importFrom poweRlaw displ
-#' @importFrom stats pnorm sd
+#' @importFrom stats integrate pnorm runif sd
 #' @importFrom VGAM zeta
 NULL

@@ -11,12 +11,10 @@ rplconv(n, x0, alpha, discrete_max = 10000)
 
 \item{x0}{Traditional cutoff parameter of Pareto distribution}
 
+\item{alpha}{Primary shape parameter of Pareto distribution}
+
 \item{discrete_max}{Upper limit for generation (see \code{poweRlaw::rpldis}
 for details)}
-
-\item{a}{Primary shape parameter of Pareto distribution}
-
-\item{n}{Number of convolutions}
 }
 \value{
 Vector of \code{n} random deviates

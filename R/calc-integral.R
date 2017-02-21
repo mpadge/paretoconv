@@ -12,7 +12,7 @@
 #' @note This function calculates the integrals defined by Ramsay and used to
 #' evaoluate the PDF/CDF functions (for both non-integer and integer versions).
 #' The integrals of the PDF are calculated with the separate function,
-#' \cdoe{pdf_integral}.
+#' \code{pdf_integral}.
 #'
 #' @note This procedure generally involves very few loops, so \code{rough}
 #' doesn't really make much difference to speed, yet yields inferior estimates

@@ -2,8 +2,7 @@
 #'
 #' @param n Number of deviates
 #' @param x0 Traditional cutoff parameter of Pareto distribution
-#' @param a Primary shape parameter of Pareto distribution
-#' @param n Number of convolutions
+#' @param alpha Primary shape parameter of Pareto distribution
 #' @param discrete_max Upper limit for generation (see \code{poweRlaw::rpldis}
 #' for details)
 #'
@@ -11,6 +10,8 @@
 #' generate random deviates for all values including 0<x<xmin.
 #'
 #' @return Vector of \code{n} random deviates
+#'
+#' @export
 rplconv <- function (n, x0, alpha, discrete_max=10000)
 {
     x0 <- floor (x0)
