@@ -3,81 +3,50 @@
 #' @param f The integrand function to be integrated
 #' @param x value of independent variable
 #' @param a The primary shape parameter of the Pareto distribution 
+#' @param x0 Lower cut-off point of classical heavy-tailed distribution
 #' @param n Number of convolutions
 #' @param incr Proportional factor by which to increase upper limit at each step
-#' @param rough If TRUE, calculates a rough upper limit from the integrand
-#' rather than the integral, taking the first point where both absolute values
-#' and differences decrease below tol.
 #'
 #' @note This function calculates the integrals defined by Ramsay and used to
 #' evaoluate the PDF/CDF functions (for both non-integer and integer versions).
 #' The integrals of the PDF are calculated with the separate function,
 #' \code{pdf_integral}.
 #'
-#' @note This procedure generally involves very few loops, so \code{rough}
-#' doesn't really make much difference to speed, yet yields inferior estimates
-#' of the integral.
-#'
 #' @return Single value of integral
-calc_integral <- function (f, x, a, x0, n, incr=0.01, rough=FALSE)
+calc_integral <- function (f, x, a, x0, n, incr=0.1)
 {
     # Setting appropriate upper limits is very important because integrals in
     # these non-integer cases often diverge for high upper limits. An
     # appropriate upper limit is first found here by finding two consecutive
-    # values of the integrand (f) for which the latter lies within tol of zero
-    # and for which the difference between them is also < tol.
-    #
-    # Starting value is taken as 10 * x, increasing by incr each step.
-    tol <- 1e-5
-    chng <- 1
-    upper <- 2 * x
-    if (rough)
-        val_old <- do.call (f, list (z=upper, x=x, a=a, x0=x0, n=n))
-    else
-        val_old <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                        x=x, a=a, x0=x0, n=n)$integral
-    if (!is.nan (val_old))
+    # values of the integrand (f) which are both within tol of zero
+    tol <- 1e-10
+    val <- chng <- upper <- 1
+    nlim <- 1e6
+    count <- 1
+    err <- FALSE
+    while (chng > tol)
     {
-        # increase upper limit until tolerance reached
-        maxiter <- 1e3
-        niter <- 1
-        while (chng > tol && niter < maxiter)
+        upper <- upper * (1 + incr)
+        val_old <- val
+        val <- do.call (f, list (z=upper, x=x, a=a, x0=x0, n=n))
+        chng <- abs (val) + abs (val_old) 
+        count <- count + 1
+        if (count > nlim)
         {
-            upper <- upper * (1 + incr)
-            if (rough)
-                val <- do.call (f, list (z=upper, x=x, a=a, x0=x0, n=n))
-            else
-                val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                                 x=x, a=a, x0=x0, n=n)$integral
-            if (is.nan (val))
-            {
-                upper <- upper / (1 + incr)
-                break
-            } else
-            {
-                if (abs (val) < tol)
-                    chng <- 0 # will stop loop at first instance, so will never / 0
-                else
-                    chng <- abs (val - val_old) / val_old
-                val_old <- val
-                niter <- niter + 1
-            }
-        }
-        if (niter >= maxiter)
-            warning ("Integral did not converge!")
-        if (rough)
-            val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper, 
-                                        x=x, a=a, x0=x0, n=n)$integral
-    } else
-    {
-        # value at upper limit undefined, so decrease until defined value
-        val <- NaN
-        while (is.nan (val))
-        {
-            upper <- upper / (1 + incr)
-            val <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                                            x=x, a=a, x0=x0, n=n)$integral
+            err <- TRUE
+            break
         }
     }
-    return (val)
+
+    if (err)
+    {
+        warning ("Integral did not converge")
+        ret <- NA
+    } else
+    {
+        upper <- ceiling (upper)
+        ret <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
+                             x=x, a=a, x0=x0, n=n)$integral
+    }
+    return (ret)
 }

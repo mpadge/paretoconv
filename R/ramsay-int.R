@@ -70,7 +70,7 @@ ramsay_int_cdf <- function (x, a, n, x0)
     if (x == 0)
         1
     else
-        1 - calc_integral (integrand, x, a, x0, n, incr=10, rough=TRUE)
+        1 - calc_integral (integrand, x, a, x0, n)
 }
 
 #' PDF for Convolution of Pareto distributions for integer alpha
@@ -108,5 +108,5 @@ ramsay_int_pdf <- function (x, a, n, x0)
     if (x == 0)
         0
     else
-        calc_integral (integrand, x, a, x0, n, incr=10, rough=TRUE) / (n * x0)
+        calc_integral (integrand, x, a, x0, n) / (n * x0)
 }
