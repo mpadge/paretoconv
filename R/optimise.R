@@ -45,7 +45,7 @@ pareto_optimise <- function (m, x0=1, n=1, quiet=TRUE)
 
     x0vec <- rep ((x0 - 1):(x0 + 1), 3)
     nvec <- rep ((n - 1):(n + 1), each=3)
-    indx <- which (x0vec > 0 & nvec > 0)
+    indx <- which (x0vec > 0 & nvec >= 0)
     x0vec <- x0vec [indx]
     nvec <- nvec [indx]
     if (!quiet)
