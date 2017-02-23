@@ -15,6 +15,17 @@
 #' @return Single value of integral
 calc_integral <- function (f, x, a, x0, n, incr=0.1)
 {
+    # This parameter is for hcubature and is important for very low values of x
+    # for which hcubature often fails to converge at all, presumably because the
+    # tolerance is relative and low x -> *VERY* low integrals, and so unreliable
+    # measures of relative tolerance. The resultant values are very, very low
+    # regardless, so stopping at maxEval is fine in these cases, and 1e4 seems
+    # to generate perfectly fine values yet not affect "normal" operation at
+    # all.
+    maxEval <- 0 # default of no limit
+    if (x < x0 / 4)
+        maxEval <- 1e4
+
     # Setting appropriate upper limits is very important because integrals in
     # these non-integer cases often diverge for high upper limits. An
     # appropriate upper limit is first found here by finding two consecutive
@@ -46,7 +57,7 @@ calc_integral <- function (f, x, a, x0, n, incr=0.1)
     {
         upper <- ceiling (upper)
         ret <- cubature::hcubature (f, lowerLimit=0, upperLimit=upper,
-                             x=x, a=a, x0=x0, n=n)$integral
+                             x=x, a=a, x0=x0, n=n, maxEval=1e4)$integral
     }
     return (ret)
 }
