@@ -16,8 +16,21 @@ ks_dist <- function (m, x0, n, quiet=TRUE)
     cdf <- rev (cumsum (rev (y0)))
     cdf <- cdf / max (cdf)
     y <- paretoconv (xvals, a=m$getPars (), x0=x0, n=n, cdf=TRUE, quiet=quiet)
-    yfit <- y * lm (y ~ cdf + 0)$coefficients
-    max (abs (yfit - cdf))
+
+    # Then the model y is shifted until the KS statistic is minimised
+    const <- 10
+    n <- 0
+    while (abs (const - 1) > 1e-10)
+    {
+        i1 <- which.min (cdf - y)
+        i2 <- which.max (cdf - y)
+        const <- (cdf [i1] + cdf [i2]) / (y [i1] + y [i2])
+        y <- y * const
+        n <- n + 1
+        if (n > 100) # this should never happen
+            stop ('KS statistic calculation did not converge')
+    }
+    max (abs (y - cdf))
 }
 
 
@@ -43,38 +56,66 @@ pareto_optimise <- function (m, x0=1, n=1, quiet=TRUE)
     if (!is (m, 'displ'))
         stop ('m must be a poweRlaw::displ object')
 
-    x0vec <- rep ((x0 - 1):(x0 + 1), 3)
-    nvec <- rep ((n - 1):(n + 1), each=3)
-    indx <- which (x0vec > 0 & nvec >= 0)
-    x0vec <- x0vec [indx]
-    nvec <- nvec [indx]
+    # First check whether n=0 is an optimum. This is a special case because x0
+    # has no effect for n=0
+    y_n0 <- ks_dist (m, x0=m$getXmin (), n=0)
+    # TODO: Improve this check, which currently only uses x=1:4
     if (!quiet)
-        message ('calculating initial KS statistics ...')
-    y <- sapply (seq (indx), function (i) ks_dist (m, x0=x0vec [i], n=nvec [i]))
-    i <- which.min (y)
-    x0vec_old <- x0vec
-    nvec_old <- nvec
-    count <- 1
-    while (which.min (y) != 5) # while min is not mid-point
+        message ('checking whether non-convoluted version is optimal')
+    y_n1 <- sapply (1:4, function (i) ks_dist (m, x0=i, n=1))
+    if (all (y_n1 > y_n0) & all (diff (y_n1) > 0))
+        ret <- c (x0, 0, y_n0)
+    else
     {
-        x0 <- x0vec [which.min (y)]
-        n <- nvec [which.min (y)]
-        if (!quiet)
-            message ('iteration#', count, ' -> (x0, n) = (', x0, ', ', n, ')')
-        x0vec_old <- x0vec
-        nvec_old <- nvec
         x0vec <- rep ((x0 - 1):(x0 + 1), 3)
         nvec <- rep ((n - 1):(n + 1), each=3)
-        indx <- which (x0vec %in% x0vec_old & nvec %in% nvec_old)
-        indx_old <- which (x0vec_old %in% x0vec & nvec_old %in% nvec)
-        y_old <- y
-        y <- rep (NA, 9)
-        y [indx] <- y_old [indx_old]
-        y [which (is.na (y))] <- sapply (which (is.na (y)), function (i)
-                                         ks_dist (m, x0=x0vec [i], n=nvec [i]))
-        count <- count + 1
+        indx <- which (x0vec > 0 & nvec >= 0)
+        x0vec <- x0vec [indx]
+        nvec <- nvec [indx]
+        if (!quiet)
+            message ('calculating initial KS statistics ...')
+        y <- rep (NA, length (indx))
+        indx <- which (x0vec %in% 1:4 & nvec == 0)
+        y [indx] <- y_n1
+        y <- sapply (which (is.na (y)), function (i) 
+                     ks_dist (m, x0=x0vec [i], n=nvec [i]))
+        i <- which.min (y)
+        count <- 1
+        at_min <- FALSE
+        if (x0vec [which.min (y)] == x0 & nvec [which.min (y)] == n)
+            at_min <- TRUE
+        while (!at_min)
+        {
+            x0 <- x0vec [which.min (y)]
+            n <- nvec [which.min (y)]
+            if (!quiet)
+                message ('iteration#', count, ' -> (x0, n) = (', x0, ', ', n, ')')
+            x0vec_old <- x0vec
+            nvec_old <- nvec
+            x0vec <- rep ((x0 - 1):(x0 + 1), 3)
+            nvec <- rep ((n - 1):(n + 1), each=3)
+            indx <- which (x0vec > 0 & nvec >= 0)
+            x0vec <- x0vec [indx]
+            nvec <- nvec [indx]
+            indx <- which (x0vec %in% x0vec_old & nvec %in% nvec_old)
+            indx_old <- which (x0vec_old %in% x0vec & nvec_old %in% nvec)
+            y_old <- y
+            y <- rep (NA, 9)
+            y [indx] <- y_old [indx_old]
+            indx <- which (nvec >= 0)
+            nvec <- nvec [indx]
+            x0vec <- x0vec [indx]
+            y <- y [indx]
+            y [which (is.na (y))] <- sapply (which (is.na (y)), function (i)
+                                             ks_dist (m, x0=x0vec [i], n=nvec [i]))
+            count <- count + 1
+            if (x0vec [which.min (y)] == x0 & nvec [which.min (y)] == n)
+                at_min <- TRUE
+            if (count > 1e4)
+                stop ('pareto_optimise failed to converge')
+        }
+        ret <- c (x0, n, min (y))
     }
-    ret <- c (x0, n, min (y))
     names (ret) <- c ('x0', 'n', 'KS')
     return (ret)
 }
