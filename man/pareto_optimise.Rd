@@ -4,7 +4,7 @@
 \alias{pareto_optimise}
 \title{Locally optimal fitting of convoluted Pareto distribution to observed data}
 \usage{
-pareto_optimise(m, x0 = 1, n = 1, quiet = TRUE)
+pareto_optimise(m, x0 = 1, n = 1, check_non_conv = TRUE, quiet = TRUE)
 }
 \arguments{
 \item{m}{A \code{poweRlaw::displ} object containing data to be modelled}
@@ -14,6 +14,9 @@ pareto_optimise(m, x0 = 1, n = 1, quiet = TRUE)
 \item{n}{Initial guess for number of convolutions}
 
 \item{quiet}{If FALSE, progress information is dumped to screen}
+
+\item{chech_non_conv}{If TRUE first checks whether a non-convoluted model may
+be optimal}
 }
 \value{
 Position of the local optimum as quantified by \code{x0} and
