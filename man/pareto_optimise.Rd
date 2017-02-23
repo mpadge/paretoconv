@@ -13,10 +13,10 @@ pareto_optimise(m, x0 = 1, n = 1, check_non_conv = TRUE, quiet = TRUE)
 
 \item{n}{Initial guess for number of convolutions}
 
-\item{quiet}{If FALSE, progress information is dumped to screen}
-
-\item{chech_non_conv}{If TRUE first checks whether a non-convoluted model may
+\item{check_non_conv}{If TRUE first checks whether a non-convoluted model may
 be optimal}
+
+\item{quiet}{If FALSE, progress information is dumped to screen}
 }
 \value{
 Position of the local optimum as quantified by \code{x0} and

@@ -39,7 +39,7 @@ ks_dist <- function (m, x0, n, quiet=TRUE)
 #' @param m A \code{poweRlaw::displ} object containing data to be modelled
 #' @param x0 Initial guess for lower limit of Pareto distribution
 #' @param n Initial guess for number of convolutions
-#' @param chech_non_conv If TRUE first checks whether a non-convoluted model may
+#' @param check_non_conv If TRUE first checks whether a non-convoluted model may
 #' be optimal
 #' @param quiet If FALSE, progress information is dumped to screen
 #'
@@ -132,7 +132,7 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
 #' @param m A \code{poweRlaw::displ} object containing data to be modelled
 #' @param x0 Initial guess for lower limit of Pareto distribution
 #' @param n Initial guess for number of convolutions
-#' @param chech_non_conv If TRUE first checks whether a non-convoluted model may
+#' @param check_non_conv If TRUE first checks whether a non-convoluted model may
 #' be optimal
 #' @param quiet If FALSE, display progress messages on screen
 #'
