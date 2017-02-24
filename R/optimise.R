@@ -63,15 +63,21 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
     y_n0 <- ks_dist (m, x0=m$getXmin (), n=0)
     # TODO: Improve this check, which currently only uses x=1:4
     if (!quiet)
-        message ('checking whether non-convoluted version is optimal')
+        message ('checking whether non-convoluted version is optimal',
+                 appendLF=FALSE)
     if (check_non_conv)
         y_n1 <- sapply (1:4, function (i) ks_dist (m, x0=i, n=1))
     else
         y_n1 <- rep (NA, 4)
     if (all (y_n1 > y_n0) & all (diff (y_n1) > 0))
-        ret <- c (x0, 0, y_n0)
-    else
     {
+        if (!quiet)
+            message (': YES')
+        ret <- c (x0, 0, y_n0)
+    } else
+    {
+        if (!quiet)
+            message (': NO')
         x0vec <- rep ((x0 - 1):(x0 + 1), 3)
         nvec <- rep ((n - 1):(n + 1), each=3)
         indx <- which (x0vec > 0 & nvec >= 0)
@@ -155,10 +161,10 @@ sim_mod1 <- function (m, x0, n, check_non_conv=TRUE, quiet=TRUE)
     a <- m$getPars ()
     nx <- length (m$getDat ())
     xt <- rep (0, nx)
-    for (i in 1:n)
+    for (i in 0:n)
         xt <- xt + rplconv (n=nx, x0=x0, alpha=a)
-    xt <- floor (xt / n)
-    m2 <- displ$new (xt)
+    xt <- floor (xt / (n + 1))
+    m2 <- poweRlaw::displ$new (xt)
     m2$setXmin (poweRlaw::estimate_xmin (m2))
     pareto_optimise (m2, x0=x0, n=n, quiet=quiet)
 }
@@ -212,9 +218,9 @@ ks1 <- function (m, x0, n, x0mod, nmod)
     a <- m$getPars ()
     nx <- length (m$getDat ())
     xt <- rep (0, nx)
-    for (i in 1:n)
+    for (i in 0:n)
         xt <- xt + rplconv (n=nx, x0=x0, alpha=a)
-    xt <- floor (xt / n)
+    xt <- floor (xt / (n + 1))
     # Then the code from `ks_dist()`, include re-estimating a from simulated
     # data
     m2 <- poweRlaw::displ$new (xt)
@@ -254,7 +260,7 @@ pparetoconv <- function (m, x0, n, neach=10, quiet=TRUE)
         for (j in seq (ni))
         {
             ksvals <- c (ksvals, 
-                         ks1 (m, x0=3, n=2, x0mod=mods [i, 1], nmod=mods [i, 2]))
+                         ks1 (m, x0=x0, n=n, x0mod=mods [i, 1], nmod=mods [i, 2]))
             if (!quiet)
                 message ('.', appendLF=FALSE)
         }
