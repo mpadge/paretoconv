@@ -4,6 +4,8 @@ sudo: false
 cache: packages
 
 matrix:
+    allow_failures:
+        - r: oldrel # until fAsianOptions update makes it there.
     include:
         - r: release
           env: DEPS=cran
