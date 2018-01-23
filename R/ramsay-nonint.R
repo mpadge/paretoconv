@@ -6,6 +6,7 @@
 #' @param n Number of convolutions
 #'
 #' @return Single value of chi
+#' @noRd
 chi <- function (z, a, n)
 {
     # Kummer's M function, the confluent hypergeometric _1F_1. NOTE:
@@ -49,6 +50,7 @@ chi <- function (z, a, n)
 #'
 #' @return Value for the CDF of the convolution of two Pareto distributions of
 #' shape a at the value x.
+#' @noRd
 ramsay_nonint_cdf <- function (x, a, n, x0)
 {
     # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here
@@ -88,6 +90,7 @@ ramsay_nonint_cdf <- function (x, a, n, x0)
 #'
 #' @return Value for the PDF of the convolution of two Pareto distributions of
 #' shape a at the value x.
+#' @noRd
 ramsay_nonint_pdf <- function (x, a, n, x0)
 {
     # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here

@@ -6,6 +6,7 @@
 #' @param n Number of convolutions
 #'
 #' @return Single value of phi
+#' @noRd
 phi16 <- function (z, a, n)
 {
     gam <- -digamma (1) # Euler's constant
@@ -57,6 +58,7 @@ phi16 <- function (z, a, n)
 #'
 #' @return Value for the CDF of the convolution of two Pareto distributions of
 #' shape a at the value x.
+#' @noRd
 ramsay_int_cdf <- function (x, a, n, x0)
 {
     integrand <- function (z, x, a, x0, n) 
@@ -95,6 +97,7 @@ ramsay_int_cdf <- function (x, a, n, x0)
 #'
 #' @return Value for the PDF of the convolution of two Pareto distributions of
 #' shape a at the value x.
+#' @noRd
 ramsay_int_pdf <- function (x, a, n, x0)
 {
     integrand <- function (z, x, a, x0, n) 

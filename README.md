@@ -17,22 +17,10 @@ where `n` specifies the number of convolutions. Both this and `a` must be single
 
 ------------------------------------------------------------------------
 
-### News
-
--   Initial working version
-
 ### Installation
 
 ``` r
 devtools::install_github('mpadge/paretoconv')
-```
-
-### Usage
-
-``` r
-library(paretoconv)
-packageVersion('paretoconv') 
-#> [1] '0.0.0'
 ```
 
 ------------------------------------------------------------------------
@@ -58,17 +46,3 @@ legend ('topright', lwd=1, col=cols, bty='n',
 ```
 
 ![](./fig/README-example.png)
-
-------------------------------------------------------------------------
-
-### Test Results
-
-``` r
-date()
-#> [1] "Wed Feb 15 17:11:41 2017"
-testthat::test_package ('paretoconv')
-#> compare-distributions: .......
-#> paretoconv: .......................
-#> 
-#> DONE ===================================================================================================================
-```

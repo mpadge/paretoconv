@@ -36,10 +36,6 @@ distribution function, otherwise the probability density function is returned.
 
 -----
 
-### News
-
-- Initial working version 
-
 ### Installation
 
 ```{r git-install, eval=FALSE}
@@ -59,12 +55,6 @@ devtools::load_all ('.')
 options(width=120)
 ```
 
-### Usage
-
-```{r usage}
-library(paretoconv)
-packageVersion('paretoconv') 
-```
 
 -----
 
@@ -92,12 +82,3 @@ legend ('topright', lwd=1, col=cols, bty='n',
 ![](./fig/README-example.png)
 
 
-
------
-
-### Test Results
-
-```{r test, eval=TRUE}
-date()
-testthat::test_package ('paretoconv')
-```

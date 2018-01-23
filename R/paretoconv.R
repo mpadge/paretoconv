@@ -107,6 +107,7 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
 #'
 #' @return Value for the CDF or PDF from the convolution of two Pareto
 #' distributions of shape a at the value x.
+#' @noRd
 asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
 {
     indx <- sort (x, index.return=TRUE)$ix

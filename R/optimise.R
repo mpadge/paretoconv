@@ -7,6 +7,7 @@
 #' @param quiet If FALSE, progress information is dumped to screen
 #'
 #' @return A single value of the KS statistic
+#' @noRd
 ks_dist <- function (m, x0, n, quiet=TRUE)
 {
     if (!is (m, 'displ')) stop ('m must be a displ object')
@@ -146,6 +147,7 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
 #' \code{n}, along with associated Kolmogorow-Smirnov statistic quantifying
 #' maximal distance from convoluted Pareto Cumulative Distribution Function
 #' (CDF) and empirical CDF of model \code{m}.
+#' @noRd
 sim_mod1 <- function (m, x0, n, check_non_conv=TRUE, quiet=TRUE)
 {
     if (!is (m, 'displ'))
@@ -180,6 +182,7 @@ sim_mod1 <- function (m, x0, n, check_non_conv=TRUE, quiet=TRUE)
 #'
 #' @return Series of models specified by\code{x0} and \code{n}, along with
 #' numbers of times each of those models represented the optimal model
+#' @noRd
 sim_mod_series <- function (m, x0, n, times=4, quiet=TRUE)
 {
     mods <- counts <- NULL
@@ -213,6 +216,7 @@ sim_mod_series <- function (m, x0, n, times=4, quiet=TRUE)
 #' @param nmod Equivalent value of \code{n} for synthetic model
 #'
 #' @return Single value of KS statistic
+#' @noRd
 ks1 <- function (m, x0, n, x0mod, nmod)
 {
     a <- m$getPars ()

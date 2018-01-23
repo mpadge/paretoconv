@@ -13,6 +13,7 @@
 #' \code{pdf_integral}.
 #'
 #' @return Single value of integral
+#' @noRd
 calc_integral <- function (f, x, a, x0, n, incr=0.1)
 {
     # This parameter is for hcubature and is important for very low values of x
