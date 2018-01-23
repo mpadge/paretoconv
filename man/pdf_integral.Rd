@@ -32,5 +32,5 @@ integrals. This function can also take a long time to execute, particularly
 for continuous integrals.
 }
 \examples{
-pdf_integral (a=2.1, x0=5, n=0)
+pdf_integral (a = 2.1, x0 = 5, n = 0)
 }

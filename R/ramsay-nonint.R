@@ -12,18 +12,18 @@ chi <- function (z, a, n)
     # Kummer's M function, the confluent hypergeometric _1F_1. NOTE:
     # fAsianOptions reverses the order of the arguments from Abramowitz &
     # Stegun!
-    kM <- function (a, b, z) fAsianOptions::kummerM (z, a, b) # Eq. (13)
+    kM <- function (a, b, z) fAsianOptions::kummerM (z, a, b) # Eq. (13) # nolint
     # NOTE: cot (z) = 1 / tan (z)
     RI <- function (z, a, n, r)
     {
         Iza <- pi * z ^ a * exp (-z) / gamma (a) # Eq. (6)
-        Rza <- kM (1, 1-a, -z) - Iza / tan (pi * a) # Eq. (12)
+        Rza <- kM (1, 1 - a, -z) - Iza / tan (pi * a) # Eq. (12) # nolint
         Iza ^ (2 * r + 1) * Rza ^ (n - 2 * r - 1) # part of Eq. (8)
     }
     # Then the value of chi from Eq. (8)
     s1 <- function (z, a, n, r)
         (-1) ^ r * choose (n, 2 * r + 1) * RI (z, a, n, r) / pi
-    nseq <- 0:floor ((n - 1) / 2)
+    nseq <- 0:floor ( (n - 1) / 2)
     sum (sapply (nseq, function (i) s1 (z, a, n, i)))
 }
 
@@ -55,7 +55,7 @@ ramsay_nonint_cdf <- function (x, a, n, x0)
 {
     # In this integrand, z is ramsay's x and x is his t, so his F_n(t) is here
     # F_n(x), and the integral is over z-values
-    integrand <- function (z, x, a, x0, n) 
+    integrand <- function (z, x, a, x0, n)
     {
         if (z == 0)
             0

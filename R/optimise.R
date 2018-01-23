@@ -8,15 +8,16 @@
 #'
 #' @return A single value of the KS statistic
 #' @noRd
-ks_dist <- function (m, x0, n, quiet=TRUE)
+ks_dist <- function (m, x0, n, quiet = TRUE)
 {
     if (!is (m, 'displ')) stop ('m must be a displ object')
 
-    xvals <- sort (unique (m$getDat ()))
-    y0 <- as.vector (table (sort (m$getDat ())))
+    xvals <- sort (unique (m$getDat ())) #nolint
+    y0 <- as.vector (table (sort (m$getDat ()))) #nolint
     cdf <- rev (cumsum (rev (y0)))
     cdf <- cdf / max (cdf)
-    y <- paretoconv (xvals, a=m$getPars (), x0=x0, n=n, cdf=TRUE, quiet=quiet)
+    y <- paretoconv (xvals, a = m$getPars (), x0 = x0, n = n, cdf=TRUE, #nolint
+                     quiet = quiet)
 
     # Then the model y is shifted until the KS statistic is minimised
     const <- 10
@@ -45,7 +46,7 @@ ks_dist <- function (m, x0, n, quiet=TRUE)
 #' @param quiet If FALSE, progress information is dumped to screen
 #'
 #' @note This function only finds local optima - it is up to the user to ensure
-#' that the given start values are near the global optimum. Values of \code{n=0}
+#' that the given start values are near the global optimum. Values of \code{n = 0}
 #' are NOT searched.
 #'
 #' @return Position of the local optimum as quantified by \code{x0} and
@@ -54,20 +55,21 @@ ks_dist <- function (m, x0, n, quiet=TRUE)
 #' (CDF) and empirical CDF of model \code{m}.
 #'
 #' @export
-pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
+pareto_optimise <- function (m, x0 = 1, n = 1, check_non_conv=TRUE,
+                             quiet = TRUE)
 {
     if (!is (m, 'displ'))
         stop ('m must be a poweRlaw::displ object')
 
-    # First check whether n=0 is an optimum. This is a special case because x0
-    # has no effect for n=0
-    y_n0 <- ks_dist (m, x0=m$getXmin (), n=0)
+    # First check whether n = 0 is an optimum. This is a special case because x0
+    # has no effect for n = 0
+    y_n0 <- ks_dist (m, x0 = m$getXmin (), n = 0) #nolint
     # TODO: Improve this check, which currently only uses x=1:4
     if (!quiet)
         message ('checking whether non-convoluted version is optimal',
-                 appendLF=FALSE)
+                 appendLF = FALSE)
     if (check_non_conv)
-        y_n1 <- sapply (1:4, function (i) ks_dist (m, x0=i, n=1))
+        y_n1 <- sapply (1:4, function (i) ks_dist (m, x0 = i, n = 1))
     else
         y_n1 <- rep (NA, 4)
     if (all (y_n1 > y_n0) & all (diff (y_n1) > 0))
@@ -79,8 +81,8 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
     {
         if (!quiet)
             message (': NO')
-        x0vec <- rep ((x0 - 1):(x0 + 1), 3)
-        nvec <- rep ((n - 1):(n + 1), each=3)
+        x0vec <- rep ( (x0 - 1):(x0 + 1), 3)
+        nvec <- rep ( (n - 1):(n + 1), each = 3)
         indx <- which (x0vec > 0 & nvec >= 0)
         x0vec <- x0vec [indx]
         nvec <- nvec [indx]
@@ -92,8 +94,8 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
             indx <- which (x0vec %in% 1:4 & nvec == 1)
             y [indx] <- y_n1 [which (1:4 %in% x0vec)]
         }
-        y [is.na (y)] <- sapply (which (is.na (y)), function (i) 
-                                 ks_dist (m, x0=x0vec [i], n=nvec [i]))
+        y [is.na (y)] <- sapply (which (is.na (y)), function (i)
+                                 ks_dist (m, x0 = x0vec [i], n = nvec [i]))
         count <- 1
         at_min <- FALSE
         if (x0vec [which.min (y)] == x0 & nvec [which.min (y)] == n)
@@ -103,11 +105,12 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
             x0 <- x0vec [which.min (y)]
             n <- nvec [which.min (y)]
             if (!quiet)
-                message ('iteration#', count, ' -> (x0, n) = (', x0, ', ', n, ')')
+                message ('iteration#', count, ' -> (x0, n) = (',
+                         x0, ', ', n, ')')
             x0vec_old <- x0vec
             nvec_old <- nvec
-            x0vec <- rep ((x0 - 1):(x0 + 1), 3)
-            nvec <- rep ((n - 1):(n + 1), each=3)
+            x0vec <- rep ( (x0 - 1):(x0 + 1), 3)
+            nvec <- rep ( (n - 1):(n + 1), each = 3)
             indx <- which (x0vec > 0 & nvec >= 0)
             x0vec <- x0vec [indx]
             nvec <- nvec [indx]
@@ -121,7 +124,8 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
             x0vec <- x0vec [indx]
             y <- y [indx]
             y [which (is.na (y))] <- sapply (which (is.na (y)), function (i)
-                                             ks_dist (m, x0=x0vec [i], n=nvec [i]))
+                                             ks_dist (m, x0 = x0vec [i],
+                                                      n = nvec [i]))
             count <- count + 1
             if (x0vec [which.min (y)] == x0 & nvec [which.min (y)] == n)
                 at_min <- TRUE
@@ -148,27 +152,28 @@ pareto_optimise <- function (m, x0=1, n=1, check_non_conv=TRUE, quiet=TRUE)
 #' maximal distance from convoluted Pareto Cumulative Distribution Function
 #' (CDF) and empirical CDF of model \code{m}.
 #' @noRd
-sim_mod1 <- function (m, x0, n, check_non_conv=TRUE, quiet=TRUE)
+sim_mod1 <- function (m, x0, n, check_non_conv=TRUE, quiet = TRUE)
 {
     if (!is (m, 'displ'))
         stop ('m must be a poweRlaw::displ object')
 
     if (missing (x0) | missing (n))
     {
-        dat <- pareto_optimise (m, x0=1, n=1, check_non_conv=check_non_conv,
-                                quiet=quiet)
+        dat <- pareto_optimise (m, x0 = 1, n = 1,
+                                check_non_conv = check_non_conv,
+                                quiet = quiet)
         x0 <- dat [1]
         n <- dat [2]
     }
-    a <- m$getPars ()
-    nx <- length (m$getDat ())
+    a <- m$getPars () # nolint
+    nx <- length (m$getDat ()) # nolint
     xt <- rep (0, nx)
     for (i in 0:n)
-        xt <- xt + rplconv (n=nx, x0=x0, alpha=a)
+        xt <- xt + rplconv (n = nx, x0 = x0, alpha = a)
     xt <- floor (xt / (n + 1))
     m2 <- poweRlaw::displ$new (xt)
-    m2$setXmin (poweRlaw::estimate_xmin (m2))
-    pareto_optimise (m2, x0=x0, n=n, quiet=quiet)
+    m2$setXmin (poweRlaw::estimate_xmin (m2)) # nolint
+    pareto_optimise (m2, x0 = x0, n = n, quiet = quiet)
 }
 
 #' Generate a series of simulated paretoconv models
@@ -183,17 +188,18 @@ sim_mod1 <- function (m, x0, n, check_non_conv=TRUE, quiet=TRUE)
 #' @return Series of models specified by\code{x0} and \code{n}, along with
 #' numbers of times each of those models represented the optimal model
 #' @noRd
-sim_mod_series <- function (m, x0, n, times=4, quiet=TRUE)
+sim_mod_series <- function (m, x0, n, times = 4, quiet = TRUE)
 {
     mods <- counts <- NULL
     enough <- FALSE
     if (!quiet)
         message ('Generating models until same model appears ',
-                 times, ' times')
+                 times, ' times\n')
     while (!enough)
     {
-        mod <- sim_mod1 (m, x0=x0, n=n, check_non_conv=FALSE, quiet=quiet)
-        i <- which (mod [1] == mods [,1] & mod [2] == mods [,2])
+        mod <- sim_mod1 (m, x0 = x0, n = n, check_non_conv = FALSE,
+                         quiet = TRUE)
+        i <- which (mod [1] == mods [, 1] & mod [2] == mods [, 2])
         if (length (i) == 0)
         {
             mods <- rbind (mods, mod [1:2])
@@ -202,7 +208,11 @@ sim_mod_series <- function (m, x0, n, times=4, quiet=TRUE)
             counts [i] <- counts [i] + 1
         if (max (counts) >= times)
             enough <- TRUE
+        if (!quiet)
+            message ("model#", sprintf ("%02d", sum (counts)),
+                     ": (x0, n) = (", mod [1], ", ", mod [2], ")")
     }
+    message ("")
     cbind (mods, counts)
 }
 
@@ -219,17 +229,17 @@ sim_mod_series <- function (m, x0, n, times=4, quiet=TRUE)
 #' @noRd
 ks1 <- function (m, x0, n, x0mod, nmod)
 {
-    a <- m$getPars ()
-    nx <- length (m$getDat ())
+    a <- m$getPars () # nolint
+    nx <- length (m$getDat ()) # nolint
     xt <- rep (0, nx)
     for (i in 0:n)
-        xt <- xt + rplconv (n=nx, x0=x0, alpha=a)
+        xt <- xt + rplconv (n = nx, x0 = x0, alpha = a)
     xt <- floor (xt / (n + 1))
     # Then the code from `ks_dist()`, include re-estimating a from simulated
     # data
     m2 <- poweRlaw::displ$new (xt)
-    m2$setXmin (poweRlaw::estimate_xmin (m2))
-    ks_dist (m2, x0=x0mod, n=nmod)
+    m2$setXmin (poweRlaw::estimate_xmin (m2)) # nolint
+    ks_dist (m2, x0 = x0mod, n = nmod)
 }
 
 #' Estimate probability of observed KS statistic from synthetic models
@@ -245,12 +255,12 @@ ks1 <- function (m, x0, n, x0mod, nmod)
 #' \code{ks}
 #'
 #' @export
-pparetoconv <- function (m, x0, n, neach=10, quiet=TRUE)
+pparetoconv <- function (m, x0, n, neach=10, quiet = TRUE)
 {
-    ks0 <- ks_dist (m=m, x0=x0, n=n)
+    ks0 <- ks_dist (m = m, x0 = x0, n = n)
     if (!quiet)
         message ('Generating simulated models')
-    mods <- sim_mod_series (m=m, x0=x0, n=n, quiet=quiet)
+    mods <- sim_mod_series (m = m, x0 = x0, n = n, quiet = quiet)
     ksvals <- NULL
     if (!quiet)
         message ('Generating synthetic series from ', nrow (mods),
@@ -259,20 +269,21 @@ pparetoconv <- function (m, x0, n, neach=10, quiet=TRUE)
     {
         ni <- neach * mods [i, 3]
         if (!quiet)
-            message ('mod [', mods [i, 1], ', ', mods [i, 2], '] ', 
-                     appendLF=FALSE)
+            message ('mod [', mods [i, 1], ', ', mods [i, 2], '] ',
+                     appendLF = FALSE)
         for (j in seq (ni))
         {
-            ksvals <- c (ksvals, 
-                         ks1 (m, x0=x0, n=n, x0mod=mods [i, 1], nmod=mods [i, 2]))
+            ksvals <- c (ksvals,
+                         ks1 (m, x0 = x0, n = n, x0mod = mods [i, 1],
+                              nmod = mods [i, 2]))
             if (!quiet)
-                message ('.', appendLF=FALSE)
+                message ('.', appendLF = FALSE)
         }
         if (!quiet)
             message ('')
     }
     if (!quiet)
         message ('Generated ', length (ksvals), ' synthetic KS statistics')
-    dk <- density (ksvals, n=2^16)
+    dk <- density (ksvals, n = 2 ^ 16)
     length (dk$y [dk$y > ks0]) / length (dk$y)
 }

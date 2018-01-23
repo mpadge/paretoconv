@@ -47,7 +47,7 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
     if (length (n) > 1) stop ('n must be a single value only')
 
     if (any (x < 0)) stop ('x must be positive')
-    if (n%%1 != 0) stop ('n must be an integer')
+    if (n %% 1 != 0) stop ('n must be an integer')
     if (n < 0) stop ('n must be a non-negative integer')
 
     fn <- "" # supress R CMD check warnings
@@ -60,7 +60,7 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
     } else
     {
         a <- a - 1 # Ramsay transforms to this value
-        if (a%%1 == 0) 
+        if (a %% 1 == 0)
         {
             if (cdf)
                 fn <- "ramsay_int_cdf"
@@ -76,12 +76,12 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
         # The value of 10 is arbitrary, but serves to implement aymptotic
         # approximations for large x in longer vectors.
         if (length (x) < 10 | !asymp)
-            y <- sapply (x, function (i) 
-                         do.call (fn, list (x=i, a=a, n=n, x0=x0)))
+            y <- sapply (x, function (i)
+                         do.call (fn, list (x = i, a = a, n = n, x0 = x0)))
         else
         {
             # aymptotic approximation
-            y <- asympt (x=x, fn=fn, a=a, n=n, x0=x0, quiet=quiet)
+            y <- asympt (x = x, fn = fn, a = a, n = n, x0 = x0, quiet = quiet)
         }
     }
 
@@ -108,12 +108,12 @@ paretoconv <- function (x, a, n, x0=1, cdf=FALSE, asymp=TRUE, quiet=TRUE)
 #' @return Value for the CDF or PDF from the convolution of two Pareto
 #' distributions of shape a at the value x.
 #' @noRd
-asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
+asympt <- function (x, fn, a, n, x0, tol = 0.05, quiet = quiet)
 {
-    indx <- sort (x, index.return=TRUE)$ix
+    indx <- sort (x, index.return = TRUE)$ix
     x <- x [indx]
     y <- rep (NA, length (x))
-    y [1] <- do.call (fn, list (x=x[1], a=a, x0=x0, n=n))
+    y [1] <- do.call (fn, list (x = x[1], a = a, x0 = x0, n = n))
     dy <- 1
     alph <- a + 1 # because 1 has already been subtracted above
     if (grepl ("cdf", fn))
@@ -122,27 +122,29 @@ asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
     for (i in 2:length (x))
     {
         if (dy > tol)
-            y [i] <- do.call (fn, list (x=x[i], a=a, x0=x0, n=n))
+            y [i] <- do.call (fn, list (x = x[i], a = a, x0 = x0, n = n))
         else # asymptotic approximation
-            y [i] <- y [i-1] * (x [i] / x [i-1]) ^ (-alph)
+            y [i] <- y [i - 1] * (x [i] / x [i - 1]) ^ (-alph)
 
-        dx <- x [i] / x [i-1]
-        if (x [i-1] == 0) dx <- 1 # in case x [1] == 0
+        dx <- x [i] / x [i - 1]
+        if (x [i - 1] == 0) dx <- 1 # in case x [1] == 0
         if (y [i] == 0)
             dy <- 0
         else
-            dy <- abs (y [i] / y [i-1] - dx ^ (-alph)) / (dx - 1)
+            dy <- abs (y [i] / y [i - 1] - dx ^ (-alph)) / (dx - 1)
 
         if (!quiet & msg)
-            message ("\rnot converged to asymptotic tail at x [", i-1, 
-                     "/", length (x), "] = ", x [i], "; dy = ", 
-                     formatC (dy, format="f", digits=3), " > ", tol, appendLF=FALSE)
+            message ("\rnot converged to asymptotic tail at x [", i - 1,
+                     "/", length (x), "] = ", x [i], "; dy = ",
+                     formatC (dy, format = "f", digits = 3),
+                     " > ", tol, appendLF = FALSE)
         if (dy < tol)
         {
             if (!quiet & msg)
-                message ("\rconverged to asymptotic tail at x [", i-1, 
-                         "/", length (x), "] = ", x [i], "; dy = ", 
-                         formatC (dy, format="f", digits=3), " < ", tol, "             ")
+                message ("\rconverged to asymptotic tail at x [", i - 1,
+                         "/", length (x), "] = ", x [i], "; dy = ",
+                         formatC (dy, format = "f", digits = 3),
+                         " < ", tol, "             ")
             msg <- FALSE
         }
     }
@@ -164,24 +166,24 @@ asympt <- function (x, fn, a, n, x0, tol=0.05, quiet=quiet)
 #' @return Single integer value of limit beyond which PDF may be approximated by
 #' its asymptotic power law
 #' @export
-get_asymp_limit <- function (a, n, x0, tol=0.05, quiet=FALSE)
+get_asymp_limit <- function (a, n, x0, tol = 0.05, quiet = FALSE)
 {
     # NOTE: The point of asymptotic convergence is approached by multiplying
     # each value of `x` by `(1 + dy)`, so that `x` increases by less as the
     # convergence point is approached. This is necessary because increasing `x`
-    # too rapidly leads to `paretoconv()` returning `y=0`, and so `dy` becomes
+    # too rapidly leads to `paretoconv()` returning `y = 0`, and so `dy` becomes
     # undefined.
     x <- 1:2
     dy <- 1
     while (dy > tol)
     {
-        y <- paretoconv (x, a=a, x0=x0, n=n, cdf=FALSE)
+        y <- paretoconv (x, a = a, x0 = x0, n = n, cdf = FALSE)
         dx <- x [2] / x [1]
         dy <- abs (y [2] / y [1] - dx ^ (-a)) / (dx - 1)
         if (any (y == 0)) dy <- 0
         if (!quiet & dy > tol)
             message ('\rdy [x = ', round (x [1]), '] = ', dy, ' > ', tol,
-                     appendLF=FALSE)
+                     appendLF = FALSE)
         x [1] <- x [1] * (1 + dy)
         x [2] <- x [1] + 1
     }

@@ -29,6 +29,6 @@ Locally optimal fitting of convoluted Pareto distribution to observed data
 }
 \note{
 This function only finds local optima - it is up to the user to ensure
-that the given start values are near the global optimum. Values of \code{n=0}
+that the given start values are near the global optimum. Values of \code{n = 0}
 are NOT searched.
 }

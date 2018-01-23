@@ -11,27 +11,28 @@ phi16 <- function (z, a, n)
 {
     gam <- -digamma (1) # Euler's constant
 
-    m <- a + 1 
+    m <- a + 1
     # Eq (13): phi_{m,n}(\nu) \sim (Ei_{m+1}(\nu)); here m=a+1
     if (m < 2)
         t1 <- gam + log (z)
     else
-        t1 <- gam + log (z) - sum(1/1:(m - 1))
-    t1 <- exp (-z) * z^(m - 1) * t1 / factorial (m-1)
+        t1 <- gam + log (z) - sum(1 / 1:(m - 1))
+    t1 <- exp (-z) * z ^ (m - 1) * t1 / factorial (m - 1)
     # Note that R's factorial goes up to and includes 170
     qq <- 0:170
-    qq <- qq [!qq %in% (m-1)]
+    qq <- qq [!qq %in% (m - 1)]
     # TODO: Compare timing using cumprod instead of factorial
     # Then note that z^qq generates Inf for large z, but in which case
     # exp(-z)/q! will always be smaller, so Inf values may safely be
-    # presumed to be zero 
-    t2 <- z ^ qq * exp (-z) / ((qq - m + 1) * factorial (qq))
+    # presumed to be zero
+    t2 <- z ^ qq * exp (-z) / ( (qq - m + 1) * factorial (qq))
     t2 <- sum (t2 [which (is.finite (t2) & !is.nan (t2))])
-    eim <- t1 + t2 
+    eim <- t1 + t2
 
     # Then the sum for phi_{a,n}(nu)
-    rr <- 0:floor((n-1)/2)
-    summand <- (-pi^2)^rr * choose (n, 2*rr+1) * eim ^ (n - 2 * rr - 1) * 
+    rr <- 0:floor( (n - 1) / 2)
+    summand <- (-pi ^ 2) ^ rr * choose (n, 2 * rr + 1) *
+        eim ^ (n - 2 * rr - 1) *
         (z ^ a * exp (-z) / factorial (a)) ^ (2 * rr + 1)
     (-1) ^ (n + 1) * a ^ n * sum (summand)
 }
@@ -61,7 +62,7 @@ phi16 <- function (z, a, n)
 #' @noRd
 ramsay_int_cdf <- function (x, a, n, x0)
 {
-    integrand <- function (z, x, a, x0, n) 
+    integrand <- function (z, x, a, x0, n)
     {
         if (z != 0)
             ret <- (1 - exp (-x * z / x0)) * phi16 (z, a, n) / z
@@ -100,7 +101,7 @@ ramsay_int_cdf <- function (x, a, n, x0)
 #' @noRd
 ramsay_int_pdf <- function (x, a, n, x0)
 {
-    integrand <- function (z, x, a, x0, n) 
+    integrand <- function (z, x, a, x0, n)
     {
         if (z == 0)
             ret <- 0

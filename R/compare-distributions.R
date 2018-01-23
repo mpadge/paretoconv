@@ -3,8 +3,8 @@ dpldis_paretoconv <- function (x, xmin, alpha) {
     #x <- x [round (x) >= round (xmin)]
     xmin <- floor (xmin)
     constant <- VGAM::zeta (alpha)
-    if(xmin > 1) 
-        constant <- constant - sum ((1:(xmin - 1)) ^ (-alpha))
+    if (xmin > 1)
+        constant <- constant - sum ( (1:(xmin - 1)) ^ (-alpha))
 
     -alpha * log (x) - log (constant)
 }
@@ -19,20 +19,21 @@ dpldis_paretoconv <- function (x, xmin, alpha) {
 #' @param d1 Discrete power law distribution of class \code{displ} from the
 #' package \code{poweRlaw}.
 #' @param d2 Equivalent convoluted values for the probability density function
-#' obtained from \code{paretoconv (..., cdf=FALSE)}
+#' obtained from \code{paretoconv (..., cdf = FALSE)}
 #'
 #' @export
 #' @examples
 #' \dontrun{
-#' data ('native_american', package='poweRlaw')
+#' data ('native_american', package = 'poweRlaw')
 #' m1 <- displ$new(native_american$Cas)
 #' m1$setXmin (3)
 #' m1$setPars (estimate_pars(m1))
 #' x <- sort (unique (native_american$Cas))
-#' y <- paretoconv (x=x, a=m1$getPars (), x0=3, n=2, cdf=FALSE, quiet=FALSE)
+#' y <- paretoconv (x = x, a = m1$getPars (), x0 = 3, n = 2,
+#' cdf = FALSE, quiet = FALSE)
 #' compare_conv_distributions (m1, y)
 #' }
-compare_conv_distributions <- function (d1, d2) 
+compare_conv_distributions <- function (d1, d2)
 {
     if (missing (d1) | missing (d2))
         stop ('Two distributions must be provided')
@@ -41,23 +42,27 @@ compare_conv_distributions <- function (d1, d2)
     if (!is.numeric (d2))
         stop ('Second argument must be a vector')
 
-    xs <- sort (d1$getDat ())
+    xs <- sort (d1$getDat ()) # nolint
     x <- unique (xs)
     if (length (d2) != length (x))
-        stop ('Length of second argument does not correspond to data in first argument')
+        stop ('Length of second argument does not correspond to ',
+              'data in first argument')
     d2 <- log (d2 [match (xs, x)])
 
-    d1 <- dpldis_paretoconv (xs, d1$getXmin (), d1$getPars ())
+    d1 <- dpldis_paretoconv (xs, d1$getXmin (), d1$getPars ()) # nolint
     ll_ratio_pts <- d2 - d1 # NOTE: d2 is first!
     m <- mean (ll_ratio_pts [is.finite (ll_ratio_pts)])
     s <- sd (ll_ratio_pts [is.finite (ll_ratio_pts)])
     v <- sqrt (length (ll_ratio_pts)) * m / s
     p1 <- pnorm (v)
-  
-    if (p1 < 0.5) { p2 <- 2 * p1 } else { p2 <- 2 * (1 - p1) }
 
-    l <- list (test_statistic = v, p_one_sided = 1 - p1, p_two_sided=p2, 
-              ratio = data.frame (x=xs, ratio=ll_ratio_pts))
+    if (p1 < 0.5)
+        p2 <- 2 * p1
+    else
+        p2 <- 2 * (1 - p1)
+
+    l <- list (test_statistic = v, p_one_sided = 1 - p1, p_two_sided = p2,
+              ratio = data.frame (x = xs, ratio = ll_ratio_pts))
     class(l) <- 'compare_distributions'
     return(l)
 }
@@ -79,15 +84,16 @@ compare_conv_distributions <- function (d1, d2)
 #'
 #' @export
 #' @examples
-#' pdf_integral (a=2.1, x0=5, n=0)
-pdf_integral <- function (a, x0=1, n=0, discrete=TRUE, xmin=0, quiet=TRUE)
+#' pdf_integral (a = 2.1, x0 = 5, n = 0)
+pdf_integral <- function (a, x0 = 1, n = 0, discrete = TRUE, xmin = 0,
+                          quiet = TRUE)
 {
     if (missing (a)) stop ('Value of a must be given')
 
     if (n == 0 & xmin == 0)
     {
         if (!quiet)
-            message ('Integrating from lower limit of 1 for n=0')
+            message ('Integrating from lower limit of 1 for n = 0')
         xmin <- 1
     }
 
@@ -95,14 +101,15 @@ pdf_integral <- function (a, x0=1, n=0, discrete=TRUE, xmin=0, quiet=TRUE)
     {
         nx <- 1e5
         x <- x0:nx
-        y <- paretoconv (x, a=a, x0=x0, n=n, cdf=FALSE, asymp=TRUE, quiet=quiet)
+        y <- paretoconv (x, a = a, x0 = x0, n = n, cdf = FALSE,
+                         asymp = TRUE, quiet = quiet)
         ret <- (y [1] + y [length (y)]) / 2 + sum (y [2:(length (y) - 1)])
     } else
     {
         if (!quiet)
             message ('Getting asymptotic limit for convergence to power law')
-        xlim <- get_asymp_limit (a=a, x0=x0, n=n, quiet=quiet)
-        ylim <- paretoconv (x=xlim, a=a, x0=x0, n=n, cdf=FALSE)
+        xlim <- get_asymp_limit (a = a, x0 = x0, n = n, quiet = quiet)
+        ylim <- paretoconv (x = xlim, a = a, x0 = x0, n = n, cdf = FALSE)
 
         # Then a function needs to be defined for the integration
         f <- function (x, a, x0, n, xlim, ylim)
@@ -111,7 +118,8 @@ pdf_integral <- function (a, x0=1, n=0, discrete=TRUE, xmin=0, quiet=TRUE)
             indx1 <- which (x < xlim)
             indx2 <- which (x >= xlim)
             if (length (indx1) > 0)
-                y [indx1] <- paretoconv (x [indx1], a=a, x0=x0, n=n, asymp=FALSE)
+                y [indx1] <- paretoconv (x [indx1], a = a, x0 = x0, n = n,
+                                         asymp = FALSE)
             if (length (indx2) > 0)
                 y [indx2] <- ylim * (x [indx2] / xlim) ^ (-a)
             return (y)
@@ -123,8 +131,8 @@ pdf_integral <- function (a, x0=1, n=0, discrete=TRUE, xmin=0, quiet=TRUE)
         # And note here that pracma::integral() is much slower than the standard
         # integrate function, and that cubature::hcubature() (the re-named
         # version of adaptIntegrat()) actually doesn't even work for paretoconv.
-        ret <- integrate (f, lower=xmin, upper=Inf, a=a, x0=x0, n=n, 
-                          xlim=xlim, ylim=ylim)$value
+        ret <- integrate (f, lower = xmin, upper = Inf, a = a, x0 = x0, n = n,
+                          xlim = xlim, ylim = ylim)$value
     }
     return (ret)
 }
