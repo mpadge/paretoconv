@@ -353,19 +353,19 @@ get_slope1 <- function (xmin = 1, alpha = 3, delta = 0.5, len = 1e4)
         x <- lapply (alpha, function (i)
                      rpldis (len, xmin = xmin, alpha = i))
         x <- floor (Reduce (`+`, x) / length (delta))
-        displ$new(x)
+        m <- displ$new(x)
+        estimate_pars (m)$pars
     }
-    m1 <- get_plmod (alpha)
+    p1 <- get_plmod (alpha)
 
     alpha <- c (alpha, alpha0)
-    m2 <- get_plmod (c (alpha, alpha0))
-    res <- c (estimate_pars (m1)$pars, estimate_pars (m2)$pars)
+    res <- c (p1, get_plmod (c (alpha, alpha0)))
     names (res) <- c ("O2", "O3")
     return (res)
 }
 delta <- 1:10 / 10
 s <- -do.call (rbind, lapply (delta, function (i) get_slope1(delta = i)))
-plot (delta, -3 + delta, "l", col = "black", ylab = "delta",
+plot (delta, -3 + delta, "l", col = "black", ylab = "power-law slope",
       ylim = range (c (as.vector (s), -3, -2)))
 lines (delta, s [, 1], col = "red")
 lines (delta, s [, 2], col = "blue")
@@ -466,9 +466,8 @@ get_slope <- function (xmin = 1, alpha = 3, delta = 0.5)
 }
 delta <- 0:10 / 10
 s <- vapply (delta, function (i) get_slope (delta = i), numeric (1))
-plot (delta, -3 + delta, "l", ylab = "slope")
+plot (delta, -3 + delta, "l", ylab = "power-law slope")
 lines (delta, s, col = "red")
-plot (delta, s, "l", ylab = "slope")
 legend ("topleft", lwd = 1, col = c ("black", "red"),
         legend = c ("theoretical", "observed"), bty = "n")
 title (main = "Power law slopes for different values of delta")
@@ -494,6 +493,11 @@ z <- 10:100 / 10
 z <- 1:10
 yz <- fz3 (z)
 ```
+
+The `O(2)` results nevertheless produce the desired demonstration that
+second-order convolution of power law distributions accords precisely with the
+theoretical expectations from exponential functions, in that observed slopes are
+precisely biased by the value of $\Delta$.
 
 
 
