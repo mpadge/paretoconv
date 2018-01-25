@@ -1,0 +1,598 @@
+---
+title: "paretoconv"
+author: "Mark Padgham"
+date: "`r Sys.Date()`"
+output:
+    html_document:
+        toc: true
+        toc_float: true
+        theme: flatly
+        number_sections: true
+vignette: >
+  %\VignetteIndexEntry{paretoconv}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r load-packages, message=FALSE}
+devtools::load_all (".", export_all=FALSE)
+library (poweRlaw)
+```
+
+The following code analyses the American civil war data included in the
+`poweRlaw` package data.
+
+-------
+
+
+# Generating cumulative distribution functions
+
+Cumulative Distribution Functions (CDFs) are not appropriately fitted with
+conventional methods, because these assume an absolute lower limit, and simply
+normalise to  (empirical) unit integral above that limit. This section
+implements the method described in the paper to properly scale CDFs.
+
+If the maximal distance between observed ($y_i$) and modelled ($z_i$) values is
+$(z_a - y_a)$ for some particular $a$--where it is explicitly assumed that $z_a
+> y_a$---and the corresponding minimal distance is $(y_b - z_b)$ for some $b$, 
+then there will exist some value, $k$, such that,
+\begin{equation}
+    k z_a - y_a = y_b - k z_b,
+\end{equation}
+such that the observed values will extend both above and below the modelled
+values by the same extent. This extent will obviously represent the minimal
+possible value of the Kolgorov-Smirnov (KS) statistic, and will arise with a
+value of,
+\begin{equation}
+    k = \frac {y_a + y_b} {z_a + z_b}.
+\end{equation}
+The value of $k$ requires initially determining the values of $a$ and $b$ at
+which the respective maxima arise. The modelled values are the multiplied by
+this value of $k$, and the values of $a$ and $b$ once again determined, along
+with corresponding KS statisics. These subsequent values of $a$ and $b$ may
+differ from the initial values, and the procedure must be repeated until the
+values of $a$ and $b$--the positions at which the maxima arise--converge.
+
+
+
+## Straight power law
+
+The following fits a `poweRlaw` discrete power law object to the American
+casualities data.
+
+```{r displ-plot}
+data ("us_american")
+x <- us_american$Cas
+m_us <- displ$new(x)
+#m$setPars (estimate_pars (m_us))
+m_us$setXmin (estimate_xmin (m_us))
+a <- m_us$pars
+x0 <- m_us$xmin
+
+freq <- as.vector (table (sort (x)))
+cum_n <- rev (cumsum (rev (freq)))
+cum_n <- cum_n / max (cum_n)
+
+x <- sort (unique (x))
+y <- (x0 / x) ^ (a - 1)
+```
+
+The observed and modelled values are then respectively represented by `cum_n`
+and `y`. The iterative procedure is implemented with the following code, which
+simply stops when the value of $k$ converges to one, because the maximal
+difference arises for the specified values of $\{z_i\}$ without any additional
+multiplication.
+```{r}
+fit_ks_model <- function (yobs, ymod, k = 10)
+{
+    n <- 0
+    while (abs (k - 1) > 1e-10)
+    {
+        i1 <- which.min (yobs - ymod)
+        i2 <- which.max (yobs - ymod)
+        k <- (yobs [i1] + yobs [i2]) / (ymod [i1] + ymod [i2])
+        ymod <- ymod * k
+        n <- n + 1
+    }
+    message ('converged in ', n, ' iterations')
+    if (abs (max (yobs - ymod) - max (ymod - yobs)) > 1e-10)
+        message ("Iterative fitting of KS statistic did not yield equal
+                 estimates")
+    list (fit = ymod, ks = max (yobs - ymod))
+}
+ft <- fit_ks_model (cum_n, y, k = 10)
+ft$ks
+```
+
+The difference between this approach and the conventional approach used in
+`poweRlaw` can be seen in the following plot:
+```{r, fig.height=6}
+plot (m_us)
+lines (m_us, col="red", lwd=1)
+lines (x, ft$fit, col="blue", lty=2)
+```
+
+## Convoluted power law
+
+Follow the same procedure for the native American casualty data which reflect
+the convolution of multiple power-law processes.
+
+```{r displ-plot2}
+data ("native_american")
+x <- native_american$Cas
+m_na <- displ$new(x)
+m_na$setXmin (estimate_xmin (m_na))
+a <- m_na$pars
+x0 <- m_na$xmin
+
+freq <- as.vector (table (sort (x)))
+cum_n <- rev (cumsum (rev (freq)))
+cum_n <- cum_n / max (cum_n)
+
+x <- sort (unique (x))
+y <- paretoconv (x, a=a, x0 = 3, n = 2, cdf=TRUE)
+```
+
+```{r}
+ft <- fit_ks_model (cum_n, y, k = 10)
+ft$ks
+```
+
+And then the actual plot
+```{r, fig.height=6}
+plot (m_na)
+lines (m_na, col="red", lwd=1)
+lines (x, ft$fit, col="blue", lty=2)
+```
+
+
+# Optimal `paretoconv` models
+
+Optimal `paretoconv` models simply refer to values of $n$ and $x_0$. These have
+to be found using a form of discrete optimisation, currently implemented in the
+following function:
+```{r pareto_optimise, eval = FALSE}
+pareto_optimise (m_na, x0 = 1, n = 1, quiet = FALSE)
+```
+Revealing optimal values of $x_0 = 3$ and $n = 2$, with a KS distance of
+`0.02782716`. What is needed is a discrete optimisation algorithm, which doens't
+actually exist in any `R` package
+
+## Discrete Optimisation
+
+Because the maximum for most discrete cases is likely to be for fairly small
+values of `n` and `x0`, the optimisation problem is best solved by brute force.
+(Alternatives such as hard-coding a Newton-type algorithm are not really
+practical, because they all generate non-integer step sizes which can't be
+readily implemented.) A brute force gradient approach is implemented as
+`pareto_optimise()`, which repeatedly examines the $\pm1$ values around $(x_0,
+n)$, and discerns the values yielding the minimal KS statistics. The routine
+stops on convergence, yielding the following results:
+```{r optimise1, eval = FALSE}
+system.time (
+             x <- pareto_optimise (m_na, x0 = 1, n = 1, quiet = FALSE)
+             )
+x
+```
+```{r, echo=FALSE}
+x <- c (3, 2, 0.02782716)
+names (x) <- c ('x0', 'n', 'KS')
+tt <- c (24.337, 0.000, 24.337)
+names (tt) <- c ("user", "system", "elapsed")
+message ("checking whether non-convoluted version is optimal: NO\n",
+         "calculating initial KS statistics ...")
+tt; x
+```
+
+And the equivalent values for US casualities:
+```{r optimise2, eval = FALSE}
+system.time (
+             x <- pareto_optimise (m_us, x0 = 1, n = 1, quiet = FALSE)
+             )
+x
+```
+```{r, echo=FALSE}
+x [1:3] <- c (1, 1, 0.05824103)
+tt [1:3] <- c (6.137, 0.000, 6.138)
+message ("checking whether non-convoluted version is optimal: NO\n",
+         "calculating initial KS statistics ...")
+tt; x
+```
+
+
+
+------------------
+
+## Testing best model
+
+The preceding KS distance metrics may be used to establish the best model, but
+that model still needs to be statistically tested against the observed data.
+This is done using synthetic data generated with `rplconv()`, which is simply
+`poweRlaw::rpldis` modified to generate random deviates across the full range
+including `0<x<xmin`.
+
+```{r conv-synth-data}
+a <- m_na$getPars ()
+n <- 2
+nx <- 1000
+xt <- rep (0, nx)
+set.seed (0)
+for (i in 1:n)
+    xt <- xt + rplconv (n = nx, x0 = 3, alpha=a)
+xt <- floor (xt / n)
+```
+A `poweRlaw` model then has to be generated for these data by first estimating
+the value of `Xmin`:
+```{r conv-synth-data-plot}
+m_sy <- displ$new (xt)
+m_sy$setXmin (poweRlaw::estimate_xmin (m_sy))
+plot (m_sy)
+lines (m_sy, col="red", lwd=2)
+```
+
+Again, the `plot` method of `poweRlaw` just does this:
+```{r conv-synth-data2, eval = FALSE}
+x0 <- as.vector (table (sort (xt)))
+y0 <- rev (cumsum (rev (x0)))
+y0 <- y0 / max (y0)
+plot (unique (sort (xt)), y0, pch=1, log="xy")
+```
+Proper testing requires values for `x0` and `n` to be estimated for each set of
+simulated data
+```{r optimise3, eval = FALSE}
+pareto_optimise (m_sy, x0 = 3, n = 2, quiet = FALSE)
+```
+```{r, echo=FALSE}
+junk <- c (1, 2, 0.0326965)
+names (junk) <- c ('x0', 'n', 'KS')
+junk
+```
+That demonstrates the principle of testing an observed model, as well as the
+fact that synthetic models often correspond to different values of `x0` and `n`
+than the original models, and thus optimal models need to be fitted to synthetic
+data. This is time consuming, yet currently incorporated within the `paretoconv`
+function `pparetoconv()`, which generates a number of synthetic models (values
+of `a`, `x0` and `n`), uses those to generate synthetic series (using
+`rplconv()`), and derives the probability of observing a more extreme
+KS-statistic than the observed value.
+
+```{r pparetoconv, eval = FALSE}
+st <- Sys.time ()
+pparetoconv (m_na, x0 = 3, n = 2, quiet = FALSE)
+Sys.time () - st
+```
+```{r, echo=FALSE}
+message ("Generating simulated models\n",
+         "Generating models until same model appears 4 times\n\n",
+         "model#01: (x0, n) = (2, 2)\n",
+         "model#02: (x0, n) = (3, 2)\n",
+         "model#03: (x0, n) = (3, 1)\n",
+         "model#04: (x0, n) = (1, 3)\n",
+         "model#05: (x0, n) = (3, 1)\n",
+         "model#06: (x0, n) = (3, 1)\n\n",
+         "Generating synthetic series from 3 simulated models\n",
+         "mod [2, 2] ..........\n",
+         "mod [3, 1] ........................................\n",
+         "mod [1, 3] ..........\n",
+         "Generated 60 synthetic KS statistics\n")
+0.9896698
+message ("Time difference of 3.910042 mins")
+```
+And that really does take quite a long time, yet finally confirms that the
+observed KL statistic can be generated by neutral models, which suggests it is
+indeed an accurate model of the underlying data.
+
+
+-------
+
+## Probability for non-convoluted model
+
+The following code just demonstrates that the procedure works just as well for
+non-convoluted models of the type analysed with `poweRlaw`.
+
+```{r par-opt-moby, eval = FALSE}
+data ('moby', package='poweRlaw')
+m <- poweRlaw::displ$new (moby)
+m$setXmin (poweRlaw::estimate_xmin (m))
+pareto_optimise (m, x0 = 1, n = 0, quiet = FALSE)
+pparetoconv (m, x0 = 1, n = 0, quiet = FALSE)
+```
+```{r, echo=FALSE}
+message ("Generating simulated models\n",
+         "Generating models until same model appears 4 times\n\n",
+         "model#01: (x0, n) = (1, 0)\n",
+         "model#02: (x0, n) = (1, 0)\n",
+         "model#03: (x0, n) = (1, 0)\n",
+         "model#04: (x0, n) = (1, 0)\n\n",
+         "Generating synthetic series from 1 simulated models\n",
+         "mod [1, 0] ........................................\n",
+         "Generated 40 synthetic KS statistics")
+0.8884125
+```
+
+
+------------------
+
+# Convolutions of hetergeneous distributions
+
+Heterogeneous distributions can be modelled using `poweRlaw::dpldis`
+function (or `dplcon` for continuous distributions).
+
+## Pareto optimisation of `poweRlaw` simulated values
+
+Note first that values simulated with `rpldis` yield models which can be
+recreated using `pareto_optimise`:
+
+```{r Heterogeneous-conv, eval = TRUE}
+library (poweRlaw)
+alpha <- 3
+xmin <- 1
+len <- 1e4
+delta <- (-1:1) / 2 # hard-coded values
+x <- lapply (delta, function (i) rpldis (len, xmin = xmin, alpha = alpha + i))
+x <- Reduce (`+`, x)
+x <- floor (x / length (delta))
+m <- displ$new(x)
+#m$setPars (estimate_pars (m))
+m$setXmin (estimate_xmin (m))
+plot (m)
+lines (m, col = "red")
+slot (m, ".xData")$pars
+```
+This code produces realistic models, but the estimated parameters do not
+reproduce the stated value of `alpha`. Wrap in a function to examine the
+results:
+```{r get_slope1}
+get_slope1 <- function (xmin = 1, alpha = 3, delta = 0.5, len = 1e4)
+{
+    alpha0 <- alpha
+    alpha <- c (alpha0 - delta, alpha0 + delta)
+    get_plmod <- function (alpha)
+    {
+        x <- lapply (alpha, function (i)
+                     rpldis (len, xmin = xmin, alpha = i))
+        x <- floor (Reduce (`+`, x) / length (delta))
+        displ$new(x)
+    }
+    m1 <- get_plmod (alpha)
+
+    alpha <- c (alpha, alpha0)
+    m2 <- get_plmod (c (alpha, alpha0))
+    res <- c (estimate_pars (m1)$pars, estimate_pars (m2)$pars)
+    names (res) <- c ("O2", "O3")
+    return (res)
+}
+delta <- 1:10 / 10
+s <- -do.call (rbind, lapply (delta, function (i) get_slope1(delta = i)))
+plot (delta, -3 + delta, "l", col = "black", ylab = "delta",
+      ylim = range (c (as.vector (s), -3, -2)))
+lines (delta, s [, 1], col = "red")
+lines (delta, s [, 2], col = "blue")
+legend ("topleft", lwd = 1, col = c ("black", "red", "blue"),
+        legend = c ("theoretical", "O2", "O3"), bty = "n")
+title (main = "Power law slopes for different values of delta")
+```
+
+These observed lines do not really reflect the expected values at all.
+Nevertheless, fitting resultant models does converge on the expected number of
+convlutions:
+```{r fit-hetero-conv, eval = FALSE}
+devtools::load_all (".", export_all=FALSE)
+pareto_optimise (m, x0 = 1, n = 0, quiet = FALSE)
+```
+```{r, echo = FALSE}
+message ("checking whether non-convoluted version is optimal: NO\n",
+         "calculating initial KS statistics ...\n",
+         "iteration#1 -> (x0, n) = (2, 1)\n",
+         "iteration#2 -> (x0, n) = (3, 2)\n",
+         "iteration#3 -> (x0, n) = (3, 3)\n",
+         "iteration#4 -> (x0, n) = (2, 4)")
+x <- c (2.0000000, 4.0000000, 0.0484632)
+names (x) <- c ("x0", "n", "KS")
+x
+```
+
+
+## Function to generate heterogeneous convoluted power law distributions
+
+The convolution can be generated with `dpldis`, with integral from
+https://stackoverflow.com/questions/23569133/adding-two-random-variables-via-convolution-in-r#23569980
+CG currently removes all values below xmin from analysis here:
+https://github.com/csgillespie/poweRlaw/blob/master/pkg/R/pldis.R#L28
+This code has to use my current (25/01/18) PR:
+```{r load-poweRlaw}
+#devtools::load_all ("~/Downloads/poweRlaw/pkg", export_all=FALSE)
+devtools::load_all (".", export_all=FALSE)
+library (poweRlaw)
+```
+
+```{r dpldis}
+f <- function(x, xmin = 1, alpha = 3)
+    dpldis(x, xmin = xmin, alpha = alpha, log = FALSE)
+fz0 <- Vectorize (function(z) integrate (function (x, z) f (z - x) * f (x),
+                              lower = -Inf, upper = Inf, z)$value)
+fz2 <- Vectorize (function(z) integrate (function (x, z)
+                                         f (z - x, alpha = 2.5) * f (x, alpha = 3.5),
+                              lower = -Inf, upper = Inf, z)$value)
+z <- 10:1000 / 10
+y0 <- f (z)
+plot (z, y0, "l", log = "xy")
+
+yz0 <- fz0 (z)
+yz0 <- yz0 * min (y0) / min (yz0 [yz0 > 0])
+indx <- which (yz0 != 0)
+lines (z [indx], yz0 [indx], col = "blue")
+yz2 <- fz2 (z)
+yz2 <- yz2 * min (y0) / min (yz2 [yz2 > 0])
+indx <- which (yz2 != 0)
+lines (z [indx], yz2 [indx], col = "skyblue")
+
+yp <- paretoconv (x=z, a=3, n=1, x0 = 1)
+yp <- yp * min (y0) / min (yp)
+lines (z, yp, col = "red")
+legend ("topright", lwd = 1, col = c ("black", "blue", "skyblue", "red"),
+        legend = c ("no conv", "conv (delta = 0)", "conv (delta = 0.5)",
+                    "conv (Ramsay)"), bty = "n")
+```
+
+Although the heads of the `dpldis` curves do not really accord with the formal
+result of Colin Ramsay, the tails do seem to converge to the expected values. In
+particular:
+```{r}
+indx <- which (z > 20)
+summary (lm (log10 (yz0 [indx]) ~ log10 (z [indx])))$coefficients [2]
+summary (lm (log10 (yp [indx]) ~ log10 (z [indx])))$coefficients [2]
+summary (lm (log10 (yz2 [indx]) ~ log10 (z [indx])))$coefficients [2]
+```
+And the latter is as expected almost precisely 0.5 less than the other estimates
+of ~3. Wrap this in a function to estimate the slopes only:
+```{r get_slope}
+get_slope <- function (xmin = 1, alpha = 3, delta = 0.5)
+{
+    f <- function(x, xmin = 1, alpha = 3)
+        dpldis(x, xmin = xmin, alpha = alpha, log = FALSE)
+    fz <- Vectorize (function(z) integrate (function (x, z)
+                                             f (z - x, alpha = alpha - delta) *
+                                                 f (x, alpha = alpha + delta),
+                                             lower = -Inf, upper = Inf, z)$value)
+    z <- 10:1000 / 10
+    y0 <- f (z)
+
+    yz <- fz (z)
+    yz <- yz * min (y0) / min (yz [yz > 0])
+    indx <- which (z > 20)
+    summary (lm (log10 (yz [indx]) ~ log10 (z [indx])))$coefficients [2]
+}
+delta <- 0:10 / 10
+s <- vapply (delta, function (i) get_slope (delta = i), numeric (1))
+plot (delta, -3 + delta, "l", ylab = "slope")
+lines (delta, s, col = "red")
+plot (delta, s, "l", ylab = "slope")
+legend ("topleft", lwd = 1, col = c ("black", "red"),
+        legend = c ("theoretical", "observed"), bty = "n")
+title (main = "Power law slopes for different values of delta")
+```
+
+The following code implements a third-order convolution, but does not run
+because either `maximum number of subdivisions reached` or `roundoff error was
+detected`.
+```{r get_slope_O3, eval = FALSE}
+xmin <- 1
+alpha <- 3
+delta <- 0.5
+f <- function(x, xmin = 1, alpha = 3)
+    dpldis(x, xmin = xmin, alpha = alpha, log = FALSE)
+fz2 <- Vectorize (function(z) integrate (function (x, z)
+                                         f (z - x, alpha = alpha - delta) *
+                                             f (x, alpha = alpha + delta),
+                                         lower = -Inf, upper = Inf, z)$value)
+fz3 <- Vectorize (function (z) integrate (function (x, z)
+                                          fz2 (z - x) * f (x, alpha = alpha),
+                                          lower = -Inf, upper = Inf, z)$value)
+z <- 10:100 / 10
+z <- 1:10
+yz <- fz3 (z)
+```
+
+
+
+------------------
+
+
+# Comparing Distributions (old stuff)
+
+Clauset *et. al* (2009) present a justification for using log-likehihood ratios
+to compare model distributions, following Vuong (1989). Such calculations
+presume that candidate models have already been demonstrated to provide
+appropriate descriptions of observed data. These log-likelihood tests are thus
+not the appropriate tool for comparing different forms of convoluted power-law
+distributions. 
+
+In particular, log-likelihood ratios will always be maximised for the model with
+the highest mean (log-)probabilities, and without implementing an appropriate
+initial selection, this will always be the model with the lowest `x0`. In the
+present context, models can therefore only be compared using some objective
+metric of model performance, which Clauset *et. al* convincingly argue should be
+a simple maximal ('KL') distance bewteen observed and modelled distributions
+(*not* log-scaled).
+
+Although therefore not required, the following code reproduces Gillespie's
+`compare_distributions` function, which requires an alternative distribution to
+be generated for these data:
+```{r compare_distributions}
+library (poweRlaw)
+data ("native_american", package="poweRlaw")
+x <- native_american$Cas
+m1 <- poweRlaw::displ$new(x)
+m1$setPars (poweRlaw::estimate_pars (m1))
+m1$setXmin (poweRlaw::estimate_xmin (m1))
+m2 <- poweRlaw::disexp$new (x)
+m2$setPars (poweRlaw::estimate_pars (m2))
+m2$setXmin (m1$getXmin ())
+plot (m1)
+lines (m1, col="red", lwd=2)
+lines (m2, col="orange", lwd=2, lty=2)
+comp <- poweRlaw::compare_distributions (m1, m2)
+message ("test_statistic = ", comp$test_statistic, " (p = ", comp$p_two_sided, ")")
+```
+
+These values are then reproduced here using a stripped down version of 
+[`compare_distributions`](https://github.com/csgillespie/poweRlaw/blob/master/pkg/R/compare_distributions.R#L72-L94),
+hard-coded so that `d1` is a discrete power law (`dpl`), and `d2` is an
+exponential.  The function
+[`dist_pdf` for a `dpl` is defined](https://github.com/csgillespie/poweRlaw/blob/master/pkg/R/pldis.R#L27-L42)
+with parameters `(m, q=NULL, log=FALSE)`, which are passed to `dpldis (q[q >=
+m$xmin], m$xmin, m$pars, TRUE)`. The equivalent definition for an exponential is
+adapted straight from 
+[`def_disexp.R`](https://github.com/csgillespie/poweRlaw/blob/master/pkg/R/def_disexp.R#L78-L96).
+These versions are also hard-coded for `log=TRUE`, the value required for
+`compare_distributions`.
+
+
+```{r}
+dpldis2 <- function(x, xmin, alpha) {
+    x <- x[round(x) >= round(xmin)]
+    xmin <- floor(xmin)
+    constant <- VGAM::zeta(alpha)
+    if(xmin > 1) 
+        constant <- constant - sum ((1:(xmin - 1)) ^ (-alpha))
+
+    -alpha * log (x) - log (constant)
+}
+expdis <- function (m, q=NULL) 
+{
+    xmin <- m$getXmin()
+    pars <- m$getPars()
+    l1 <- pexp (q - 0.5, pars, lower.tail=FALSE, log.p=TRUE)
+    l2 <- pexp (q + 0.5, pars, lower.tail=FALSE, log.p=TRUE)
+
+    l1 + log (1 - exp (l2 - l1)) - 
+        pexp (xmin - 0.5, pars, lower.tail=FALSE, log.p=TRUE)
+}
+compare_distributions2 <- function(d1, d2) 
+{
+    xmin <- d1$getXmin()
+    q <- d1$getDat()
+    q <- q[q >= xmin]
+    ll_ratio_pts <- dpldis2 (q, xmin, m1$getPars()) - expdis(d2, q)
+
+    m <- mean(ll_ratio_pts); s <- sd(ll_ratio_pts)
+    v <- sqrt(length(ll_ratio_pts))*m/s
+    p1 <- pnorm(v)
+
+    if (p1 < 0.5) {p2 <- 2*p1} else {p2 <- 2*(1-p1)}
+
+    l <- list(test_statistic = v, 
+              p_one_sided = 1 - p1, p_two_sided=p2, 
+              ratio = data.frame(x=q, ratio=ll_ratio_pts))
+    class(l) <- "compare_distributions"
+    return(l)
+}
+```
+Then demonstrate that the above values are reproduced using these definitions:
+```{r comp-dists2, eval = FALSE}
+comp <- compare_distributions2 (m1, m2)
+message ("test_statistic = ", comp$test_statistic, " (p = ", comp$p_two_sided, ")")
+```
+

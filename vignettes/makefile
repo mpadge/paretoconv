@@ -1,4 +1,4 @@
-LFILE = aaa
+LFILE = paretoconv
 
 all: knith open 
 

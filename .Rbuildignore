@@ -1,9 +1,7 @@
-^README\.Rmd$
-^README-.*\.png$
+^aaa\.Rmd$
+^README\.*
+^vignettes/makefile$
+^docs/
 ^\.travis\.yml$
-^README\.md$
-^README\.html$
-^makefile$
-^tmux-start.bash$
 ^appveyor.yml$
-^fig
+^fig/
