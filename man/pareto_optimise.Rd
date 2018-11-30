@@ -4,7 +4,8 @@
 \alias{pareto_optimise}
 \title{Locally optimal fitting of convoluted Pareto distribution to observed data}
 \usage{
-pareto_optimise(m, x0 = 1, n = 1, check_non_conv = TRUE, quiet = TRUE)
+pareto_optimise(m, x0 = 1, n = 1, check_non_conv = TRUE,
+  quiet = TRUE)
 }
 \arguments{
 \item{m}{A \code{poweRlaw::displ} object containing data to be modelled}

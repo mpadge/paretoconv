@@ -4,10 +4,10 @@
 \name{paretoconv}
 \alias{paretoconv}
 \alias{paretoconv-package}
-\alias{paretoconv}
 \title{paretoconv.}
 \usage{
-paretoconv(x, a, n, x0 = 1, cdf = FALSE, asymp = TRUE, quiet = TRUE)
+paretoconv(x, a, n, x0 = 1, cdf = FALSE, asymp = TRUE,
+  quiet = TRUE)
 }
 \arguments{
 \item{x}{value of independent variable (may be a vector)}
@@ -34,8 +34,6 @@ Value for the CDF or PDF from the convolution of two Pareto
 distributions of shape a at the value x.
 }
 \description{
-paretoconv.
-
 Convolutes multiple Pareto distributions following 
 \itemize{
 \item For integer shape parameters: 'The Distribution of Sums of Certain
