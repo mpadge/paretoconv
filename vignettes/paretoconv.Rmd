@@ -83,7 +83,7 @@ and `y`. The iterative procedure is implemented with the following code, which
 simply stops when the value of $k$ converges to one, because the maximal
 difference arises for the specified values of $\{z_i\}$ without any additional
 multiplication.
-```{r}
+```{r fit_ks_model}
 fit_ks_model <- function (yobs, ymod, k = 10)
 {
     n <- 0
@@ -107,7 +107,7 @@ ft$ks
 
 The difference between this approach and the conventional approach used in
 `poweRlaw` can be seen in the following plot:
-```{r, fig.height=6}
+```{r plot1, fig.height=6}
 plot (m_us)
 lines (m_us, col="red", lwd=1)
 lines (x, ft$fit, col="blue", lty=2)
@@ -134,7 +134,7 @@ x <- sort (unique (x))
 y <- paretoconv (x, a=a, x0 = 3, n = 2, cdf=TRUE)
 ```
 
-```{r}
+```{r fit_ks_model-demo}
 ft <- fit_ks_model (cum_n, y, k = 10)
 ft$ks
 ```
@@ -378,7 +378,6 @@ These observed lines do not really reflect the expected values at all.
 Nevertheless, fitting resultant models does converge on the expected number of
 convlutions:
 ```{r fit-hetero-conv, eval = FALSE}
-devtools::load_all (".", export_all=FALSE)
 pareto_optimise (m, x0 = 1, n = 0, quiet = FALSE)
 ```
 ```{r, echo = FALSE}
@@ -401,13 +400,13 @@ https://stackoverflow.com/questions/23569133/adding-two-random-variables-via-con
 CG currently removes all values below xmin from analysis here:
 https://github.com/csgillespie/poweRlaw/blob/master/pkg/R/pldis.R#L28
 This code has to use my current (25/01/18) PR:
-```{r load-poweRlaw}
-#devtools::load_all ("~/Downloads/poweRlaw/pkg", export_all=FALSE)
-devtools::load_all (".", export_all=FALSE)
-library (poweRlaw)
+
+```{r junk, echo = FALSE, eval = TRUE}
+#devtools::load_all ("/data/mega/code/forks/poweRlaw/pkg", export_all = FALSE)
 ```
 
-```{r dpldis}
+
+```{r dpldis, eval = TRUE}
 f <- function(x, xmin = 1, alpha = 3)
     dpldis(x, xmin = xmin, alpha = alpha, log = FALSE)
 fz0 <- Vectorize (function(z) integrate (function (x, z) f (z - x) * f (x),
@@ -439,7 +438,7 @@ legend ("topright", lwd = 1, col = c ("black", "blue", "skyblue", "red"),
 Although the heads of the `dpldis` curves do not really accord with the formal
 result of Colin Ramsay, the tails do seem to converge to the expected values. In
 particular:
-```{r}
+```{r, eval = FALSE}
 indx <- which (z > 20)
 summary (lm (log10 (yz0 [indx]) ~ log10 (z [indx])))$coefficients [2]
 summary (lm (log10 (yp [indx]) ~ log10 (z [indx])))$coefficients [2]
@@ -447,7 +446,7 @@ summary (lm (log10 (yz2 [indx]) ~ log10 (z [indx])))$coefficients [2]
 ```
 And the latter is as expected almost precisely 0.5 less than the other estimates
 of ~3. Wrap this in a function to estimate the slopes only:
-```{r get_slope}
+```{r get_slope, eval = FALSE}
 get_slope <- function (xmin = 1, alpha = 3, delta = 0.5)
 {
     f <- function(x, xmin = 1, alpha = 3)

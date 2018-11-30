@@ -1,7 +1,7 @@
 ^aaa\.Rmd$
 ^README\.*
 ^vignettes/makefile$
-^docs/
+docs/
 ^\.travis\.yml$
 ^appveyor.yml$
-^fig/
+fig/
