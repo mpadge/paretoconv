@@ -1,7 +1,7 @@
 LFILE = paretoconv
 
-#all: knith open 
-all: alt
+all: knith
+#all: alt
 
 knith: $(LFILE).Rmd
 	echo "rmarkdown::render('$(LFILE).Rmd',output_file='$(LFILE).html', runtime='static')" | R --no-save -q
@@ -22,7 +22,8 @@ knith_alt: $(LFILE).utf8.md
 
 clean_alt:
 	mv $(LFILE).utf8.html $(LFILE).html; \
-	rm $(LFILE).md $(LFILE).utf8.md $(LFILE).knit.md
+	rm $(LFILE).md $(LFILE).utf8.md $(LFILE).knit.md \
+	rm -r $(LFILE)_files
 
 open_alt: $(LFILE).utf8.html
 	xdg-open $(LFILE).utf8.html &

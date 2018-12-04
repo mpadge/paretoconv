@@ -19,6 +19,33 @@ vignette: >
 devtools::load_all (".", export_all=FALSE)
 library (poweRlaw)
 ```
+Code to set up `ggplot2` defaults
+```{r gg, message = FALSE, eval = TRUE}
+library (showtext)
+font_add_google("Bungee Shade", "Bungee")
+font_add_google("IBM Plex Sans", "Plex")
+#font_files()
+#font_families()
+showtext_auto()
+library (ggplot2)
+theme_update (strip.background = element_rect(colour = "white", fill = "white"),
+              legend.position = c (0.15, 0.9),
+              text = element_text (size = 14,
+                                         family = "Plex"),
+              legend.title = element_blank(),
+              plot.title = element_text (size = 24,
+                                         family = "Bungee",
+                                         hjust = 0.5))
+#theme_set (theme_grey()) # reset theme
+```
+```{r gg-notxt, message = FALSE, eval = FALSE, echo = FALSE}
+library (ggplot2)
+theme_update (strip.background = element_rect(colour = "white", fill = "white"),
+              legend.position = c (0.1, 0.9),
+              plot.title = element_text (size = 24,
+                                         hjust = 0.5))
+#theme_set (theme_grey()) # reset theme
+```
 
 The following code analyses the American civil war data included in the
 `poweRlaw` package data.
@@ -350,7 +377,8 @@ function (or `dplcon` for continuous distributions).
 ## Pareto optimisation of `poweRlaw` simulated values
 
 Note first that values simulated with `rpldis` yield models which can be
-recreated using `pareto_optimise`:
+recreated using `pareto_optimise`. The following code generates a power law
+distribution by adding three separate `rpldis` series with `delta = (-1:1) / 2`.
 
 ```{r Heterogeneous-conv, eval = TRUE}
 library (poweRlaw)
@@ -369,9 +397,16 @@ lines (m, col = "red")
 slot (m, ".xData")$pars
 ```
 This code produces realistic models, but the estimated parameters do not
-reproduce the stated value of `alpha`. Wrap in a function to examine the
-results:
-```{r get_slope1}
+reproduce the stated value of `alpha`, which should be `alpha - delta = -3.5`.
+Wrap in a function to estimate the asymptotic slope as a function of `delta`,
+and apply to sequences of both 2 and 3 heterogeneous values (that is, `O(2): [a
+- d, a + d]` and `O(3): [a - d, a, a + d]`). Slopes are estimated in this
+function via the `poweRlaw::estimate_pars()` function.
+
+
+
+```{r get_slope1, message = FALSE}
+library (magrittr)
 get_slope1 <- function (xmin = 1, alpha = 3, delta = 0.5, len = 1e4)
 {
     alpha0 <- alpha
@@ -382,33 +417,32 @@ get_slope1 <- function (xmin = 1, alpha = 3, delta = 0.5, len = 1e4)
                      rpldis (len, xmin = xmin, alpha = i))
         x <- floor (Reduce (`+`, x) / length (delta))
         m <- displ$new(x)
-        estimate_pars (m)$pars
+        -estimate_pars (m)$pars # negative value
     }
-    p1 <- get_plmod (alpha)
-
-    alpha <- c (alpha, alpha0)
-    res <- c (p1, get_plmod (c (alpha, alpha0)))
+    res <- c (get_plmod (alpha),
+              get_plmod (c (alpha0, alpha)))
     names (res) <- c ("O2", "O3")
     return (res)
 }
 delta <- 1:10 / 10
-s <- -do.call (rbind, lapply (delta, function (i) get_slope1(delta = i)))
-plot (delta, -3 + delta, "l", col = "black", ylab = "power-law slope",
-      ylim = range (c (as.vector (s), -3, -2)))
-lines (delta, s [, 1], col = "red")
-lines (delta, s [, 2], col = "blue")
-legend ("topleft", lwd = 1, col = c ("black", "red", "blue"),
-        legend = c ("theoretical", "O2", "O3"), bty = "n")
-title (main = "Power law slopes for different values of delta")
-```
+s <- do.call (rbind, lapply (delta, function (i) get_slope1(delta = i)))
+s <- data.frame (delta = delta,
+                 theoretical = -3 + delta,
+                 O2 = s [, 1],
+                 O3 = s [, 2]) %>%
+    tidyr::gather (key = "type", value = "slope", -delta)
 
-These observed lines do not really reflect the expected values at all.
-Nevertheless, fitting resultant models does converge on the expected number of
-convlutions:
-```{r fit-hetero-conv, eval = FALSE}
+ggplot(s, aes (x = delta, y = slope, colour = type)) +
+    geom_line() +
+    ggtitle ("Power law slopes")
+``` 
+
+These observed lines do not really reflect the expected ("theoretical") values,
+although the clearly follow the same trajectories.
+```{r fit-hetero-conv, eval = FALSE, echo = FALSE}
 pareto_optimise (m, x0 = 1, n = 0, quiet = FALSE)
 ```
-```{r, echo = FALSE}
+```{r, echo = FALSE, eval = FALSE}
 message ("checking whether non-convoluted version is optimal: NO\n",
          "calculating initial KS statistics ...\n",
          "iteration#1 -> (x0, n) = (2, 1)\n",
@@ -425,14 +459,8 @@ x
 
 The convolution can be generated with `dpldis`, with integral from
 https://stackoverflow.com/questions/23569133/adding-two-random-variables-via-convolution-in-r#23569980
-CG currently removes all values below xmin from analysis here:
-https://github.com/csgillespie/poweRlaw/blob/master/pkg/R/pldis.R#L28
-This code has to use my current (25/01/18) PR:
-
-```{r junk, echo = FALSE, eval = TRUE}
-#devtools::load_all ("/data/mega/code/forks/poweRlaw/pkg", export_all = FALSE)
-```
-
+CRAN version of `poweRlaw` currently removes all values below xmin from
+analysis, but this is fixed with my PR (25/01/18) on current dev version.
 
 ```{r dpldis, eval = TRUE}
 f <- function(x, xmin = 1, alpha = 3)
@@ -444,29 +472,44 @@ fz2 <- Vectorize (function(z) integrate (function (x, z)
                               lower = -Inf, upper = Inf, z)$value)
 z <- 10:1000 / 10
 y0 <- f (z)
-plot (z, y0, "l", log = "xy")
 
 yz0 <- fz0 (z)
 yz0 <- yz0 * min (y0) / min (yz0 [yz0 > 0])
 indx <- which (yz0 != 0)
-lines (z [indx], yz0 [indx], col = "blue")
 yz2 <- fz2 (z)
 yz2 <- yz2 * min (y0) / min (yz2 [yz2 > 0])
 indx <- which (yz2 != 0)
-lines (z [indx], yz2 [indx], col = "skyblue")
 
 yp <- paretoconv (x=z, a=3, n=1, x0 = 1)
 yp <- yp * min (y0) / min (yp)
-lines (z, yp, col = "red")
-legend ("topright", lwd = 1, col = c ("black", "blue", "skyblue", "red"),
-        legend = c ("no conv", "conv (delta = 0)", "conv (delta = 0.5)",
-                    "conv (Ramsay)"), bty = "n")
 ```
+```{r dpldis-plot}
+yz0 [yz0 == 0] <- NA
+yz2 [yz2 == 0] <- NA
+dat <- data.frame (z = z,
+                   "noconv" = y0,
+                   "delta00" = yz0,
+                   "delta05" = yz2,
+                   "ramsay" = yp) %>%
+    tidyr::gather (key = "type", value = "y", -z)
+ggplot (dat, aes (x = z, y = y, colour = type)) +
+    scale_x_log10() +
+    scale_y_log10() +
+    geom_line() +
+    scale_colour_discrete (breaks = c ("noconv", "delta00", "delta05", "ramsay"),
+                           labels = c ("No conv",
+                                       "conv (Delta = 0)",
+                                       "conv (Delta = 0.5)",
+                                       "conv (Ramsay)")) +
+    theme (legend.position = c (0.8, 0.9)) +
+    ggtitle ("Convoluted power-law distributions")
+```
+
 
 Although the heads of the `dpldis` curves do not really accord with the formal
 result of Colin Ramsay, the tails do seem to converge to the expected values. In
 particular:
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 indx <- which (z > 20)
 summary (lm (log10 (yz0 [indx]) ~ log10 (z [indx])))$coefficients [2]
 summary (lm (log10 (yp [indx]) ~ log10 (z [indx])))$coefficients [2]
@@ -483,13 +526,12 @@ get_slope <- function (xmin = 1, alpha = 3, delta = 0.5)
                                              f (z - x, alpha = alpha - delta) *
                                                  f (x, alpha = alpha + delta),
                                              lower = -Inf, upper = Inf, z)$value)
-    z <- 10:1000 / 10
+    z <- 200:1000 / 10
     y0 <- f (z)
 
     yz <- fz (z)
     yz <- yz * min (y0) / min (yz [yz > 0])
-    indx <- which (z > 20)
-    summary (lm (log10 (yz [indx]) ~ log10 (z [indx])))$coefficients [2]
+    summary (lm (log10 (yz) ~ log10 (z)))$coefficients [2]
 }
 delta <- 0:10 / 10
 s <- vapply (delta, function (i) get_slope (delta = i), numeric (1))
@@ -499,6 +541,17 @@ legend ("topleft", lwd = 1, col = c ("black", "red"),
         legend = c ("theoretical", "observed"), bty = "n")
 title (main = "Power law slopes for different values of delta")
 ```
+```{r get_slope-fake, eval = TRUE, echo = FALSE}
+delta <- 0:10 / 10
+s <-  c (-2.958965, -2.874606, -2.784791, -2.691580, -2.590871, -2.490464,
+       -2.388093, -2.293019, -2.224518, -2.156698, -2.044593)
+dat <- data.frame (delta = delta, observed = s, theoretical = -3 + delta) %>%
+    tidyr::gather (key = "type", value = "slope", -delta)
+ggplot (dat, aes (x = delta, y = slope, colour = type)) +
+    geom_line() +
+    ggtitle ("Power law slopes")
+```
+
 
 The following code implements a third-order convolution, but does not run
 because either `maximum number of subdivisions reached` or `roundoff error was
@@ -525,6 +578,46 @@ The `O(2)` results nevertheless produce the desired demonstration that
 second-order convolution of power law distributions accords precisely with the
 theoretical expectations from exponential functions, in that observed slopes are
 precisely biased by the value of $\Delta$.
+
+
+# Fitting tails of simulated values
+
+The previous procedures employed linear regressions, which are statistically
+invalid, as explained by both Clauset and Gillepie. The procedure developed
+here, and in the manuscript, employs the `fit_ks_model` function given above.
+The following is a modification of the previous code to include that.
+
+```{r}
+ks_stat <- function (pars, x, yobs, k = 10)
+{
+    ymod <- pars [1] + x * pars [2]
+    n <- 0
+    while (abs (k - 1) > 1e-10)
+    {
+        i1 <- which.min (yobs - ymod)
+        i2 <- which.max (yobs - ymod)
+        k <- (yobs [i1] + yobs [i2]) / (ymod [i1] + ymod [i2])
+        ymod <- ymod * k
+        n <- n + 1
+    }
+    max (yobs - ymod)
+}
+
+f <- function(x, xmin = 1, alpha = 3)
+    dpldis(x, xmin = xmin, alpha = alpha, log = FALSE)
+fz <- Vectorize (function(z) integrate (function (x, z)
+                                        f (z - x, alpha = alpha - delta) *
+                                            f (x, alpha = alpha + delta),
+                                        lower = -Inf, upper = Inf, z)$value)
+z <- 500:1000 / 10
+y0 <- f (z)
+
+delta <- 0.5
+yz <- fz (z)
+#yz <- yz * min (y0) / min (yz [yz > 0])
+optim (c (-1, -3), ks_stat, x = log10 (z), yobs = log10 (yz), k = 10,
+       method = "BFGS")
+```
 
 
 
