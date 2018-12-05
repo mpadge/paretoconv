@@ -1,4 +1,4 @@
----
+zR-
 title: "paretoconv"
 author: "Mark Padgham"
 date: "`r Sys.Date()`"
@@ -379,6 +379,10 @@ function (or `dplcon` for continuous distributions).
 Note first that values simulated with `rpldis` yield models which can be
 recreated using `pareto_optimise`. The following code generates a power law
 distribution by adding three separate `rpldis` series with `delta = (-1:1) / 2`.
+Note that the addition of three series will result in values of 3 having the
+same distributional density as values of 1 in the original series. The final
+additive result thus has to have 2 subtracted to render it equivalent to the
+non-convoluted series.
 
 ```{r Heterogeneous-conv, eval = TRUE}
 library (poweRlaw)
@@ -387,17 +391,29 @@ xmin <- 1
 len <- 1e4
 delta <- (-1:1) / 2 # hard-coded values
 x <- lapply (delta, function (i) rpldis (len, xmin = xmin, alpha = alpha + i))
-x <- Reduce (`+`, x)
-x <- floor (x / length (delta))
+x <- Reduce (`+`, x) - length (delta) + 1
 m <- displ$new(x)
 #m$setPars (estimate_pars (m))
 m$setXmin (estimate_xmin (m))
 plot (m)
 lines (m, col = "red")
-slot (m, ".xData")$pars
+estimate_pars(m)$pars
 ```
 This code produces realistic models, but the estimated parameters do not
-reproduce the stated value of `alpha`, which should be `alpha - delta = -3.5`.
+reproduce the stated value of `alpha`, which should be `alpha + delta = -2.5`.
+This is actually just because of the behaviour of both extrema. Removing some
+small number at the upper end, along with the lowest values of 1, transforms
+that estimated to the following:
+```{r heterogeneous-conv2}
+for (i in 1:5)
+    x <- x [x != max (x)]
+x <- x [x > 1]
+m <- displ$new(x)
+m$setPars (estimate_pars (m))
+message (alpha, " - ", max (delta), " = ", alpha - max (delta),
+         " estimated as ", estimate_pars(m)$pars)
+```
+
 Wrap in a function to estimate the asymptotic slope as a function of `delta`,
 and apply to sequences of both 2 and 3 heterogeneous values (that is, `O(2): [a
 - d, a + d]` and `O(3): [a - d, a, a + d]`). Slopes are estimated in this
@@ -411,16 +427,19 @@ get_slope1 <- function (xmin = 1, alpha = 3, delta = 0.5, len = 1e4)
 {
     alpha0 <- alpha
     alpha <- c (alpha0 - delta, alpha0 + delta)
-    get_plmod <- function (alpha)
+    get_plmod <- function (alpha, xmin, len)
     {
         x <- lapply (alpha, function (i)
                      rpldis (len, xmin = xmin, alpha = i))
-        x <- floor (Reduce (`+`, x) / length (delta))
+        x <- Reduce (`+`, x) - length (alpha) + 1
+        for (i in 1:5)
+            x <- x [x != max (x)]
+        x <- x [x > 1]
         m <- displ$new(x)
         -estimate_pars (m)$pars # negative value
     }
-    res <- c (get_plmod (alpha),
-              get_plmod (c (alpha0, alpha)))
+    res <- c (get_plmod (alpha, xmin, len),
+              get_plmod (c (alpha0, alpha), xmin, len))
     names (res) <- c ("O2", "O3")
     return (res)
 }
@@ -437,22 +456,8 @@ ggplot(s, aes (x = delta, y = slope, colour = type)) +
     ggtitle ("Power law slopes")
 ``` 
 
-These observed lines do not really reflect the expected ("theoretical") values,
-although the clearly follow the same trajectories.
-```{r fit-hetero-conv, eval = FALSE, echo = FALSE}
-pareto_optimise (m, x0 = 1, n = 0, quiet = FALSE)
-```
-```{r, echo = FALSE, eval = FALSE}
-message ("checking whether non-convoluted version is optimal: NO\n",
-         "calculating initial KS statistics ...\n",
-         "iteration#1 -> (x0, n) = (2, 1)\n",
-         "iteration#2 -> (x0, n) = (3, 2)\n",
-         "iteration#3 -> (x0, n) = (3, 3)\n",
-         "iteration#4 -> (x0, n) = (2, 4)")
-x <- c (2.0000000, 4.0000000, 0.0484632)
-names (x) <- c ("x0", "n", "KS")
-x
-```
+The observed lines provide good estimates of the expected ("theoretical")
+values.
 
 
 ## Function to generate heterogeneous convoluted power law distributions
@@ -504,11 +509,24 @@ ggplot (dat, aes (x = z, y = y, colour = type)) +
     theme (legend.position = c (0.8, 0.9)) +
     ggtitle ("Convoluted power-law distributions")
 ```
+```{r, echo = FALSE}
+# reset NA values to 0
+yz0 [is.na (yz0)] <- 0
+yz2 [is.na (yz2)] <- 0
+```
+
 
 
 Although the heads of the `dpldis` curves do not really accord with the formal
-result of Colin Ramsay, the tails do seem to converge to the expected values. In
-particular:
+result of Colin Ramsay, the tails do seem to converge to the expected values.
+The following sub-section demonstrates how to estimate values of `alpha` from
+these tails.
+
+## Fitting tails of simulated values (1)
+
+As explained by both Clauset and Gillepie, estimates of slopes based on linear
+regressions are statistically invalid. Nevertheless, for demonstration purposes
+only, we can see that,
 ```{r, eval = TRUE}
 indx <- which (z > 20)
 summary (lm (log10 (yz0 [indx]) ~ log10 (z [indx])))$coefficients [2]
@@ -516,7 +534,7 @@ summary (lm (log10 (yp [indx]) ~ log10 (z [indx])))$coefficients [2]
 summary (lm (log10 (yz2 [indx]) ~ log10 (z [indx])))$coefficients [2]
 ```
 And the latter is as expected almost precisely 0.5 less than the other estimates
-of ~3. Wrap this in a function to estimate the slopes only:
+of ~3.  Wrap this in a function to estimate the slopes only:
 ```{r get_slope, eval = FALSE}
 get_slope <- function (xmin = 1, alpha = 3, delta = 0.5)
 {
@@ -535,11 +553,11 @@ get_slope <- function (xmin = 1, alpha = 3, delta = 0.5)
 }
 delta <- 0:10 / 10
 s <- vapply (delta, function (i) get_slope (delta = i), numeric (1))
-plot (delta, -3 + delta, "l", ylab = "power-law slope")
-lines (delta, s, col = "red")
-legend ("topleft", lwd = 1, col = c ("black", "red"),
-        legend = c ("theoretical", "observed"), bty = "n")
-title (main = "Power law slopes for different values of delta")
+dat <- data.frame (delta = delta, observed = s, theoretical = -3 + delta) %>%
+    tidyr::gather (key = "type", value = "slope", -delta)
+ggplot (dat, aes (x = delta, y = slope, colour = type)) +
+    geom_line() +
+    ggtitle ("Power law slopes")
 ```
 ```{r get_slope-fake, eval = TRUE, echo = FALSE}
 delta <- 0:10 / 10
@@ -551,7 +569,6 @@ ggplot (dat, aes (x = delta, y = slope, colour = type)) +
     geom_line() +
     ggtitle ("Power law slopes")
 ```
-
 
 The following code implements a third-order convolution, but does not run
 because either `maximum number of subdivisions reached` or `roundoff error was
@@ -580,44 +597,62 @@ theoretical expectations from exponential functions, in that observed slopes are
 precisely biased by the value of $\Delta$.
 
 
-# Fitting tails of simulated values
+## Fitting tails of simulated values (2)
 
-The previous procedures employed linear regressions, which are statistically
-invalid, as explained by both Clauset and Gillepie. The procedure developed
-here, and in the manuscript, employs the `fit_ks_model` function given above.
-The following is a modification of the previous code to include that.
-
-```{r}
-ks_stat <- function (pars, x, yobs, k = 10)
-{
-    ymod <- pars [1] + x * pars [2]
-    n <- 0
-    while (abs (k - 1) > 1e-10)
-    {
-        i1 <- which.min (yobs - ymod)
-        i2 <- which.max (yobs - ymod)
-        k <- (yobs [i1] + yobs [i2]) / (ymod [i1] + ymod [i2])
-        ymod <- ymod * k
-        n <- n + 1
-    }
-    max (yobs - ymod)
-}
-
-f <- function(x, xmin = 1, alpha = 3)
+The unbiased ML estimator of the slope for discrete power laws is
+\begin{equation}
+    \hat{\alpha} = 1 + n \left[\sum_{i = 1}^n {\rm ln} \frac{x_i}{x_{min} -
+    \frac{1}{2}} \right]^{-1}.
+\end{equation}
+We begin by repeating the code used to generate the probability density series.
+```{r probdens-est_a}
+xmin <- 10
+f <- function(x, xmin = 10, alpha = 3)
     dpldis(x, xmin = xmin, alpha = alpha, log = FALSE)
-fz <- Vectorize (function(z) integrate (function (x, z)
-                                        f (z - x, alpha = alpha - delta) *
-                                            f (x, alpha = alpha + delta),
-                                        lower = -Inf, upper = Inf, z)$value)
-z <- 500:1000 / 10
+fz0 <- Vectorize (function(z) integrate (function (x, z) f (z - x) * f (x),
+                              lower = -Inf, upper = Inf, z)$value)
+fz2 <- Vectorize (function(z) integrate (function (x, z)
+                                         f (z - x, alpha = 2.5) * f (x, alpha = 3.5),
+                              lower = -Inf, upper = Inf, z)$value)
+z <- 1:1000
 y0 <- f (z)
-
-delta <- 0.5
-yz <- fz (z)
-#yz <- yz * min (y0) / min (yz [yz > 0])
-optim (c (-1, -3), ks_stat, x = log10 (z), yobs = log10 (yz), k = 10,
-       method = "BFGS")
+yz0 <- fz0 (z)
+yz2 <- fz2 (z)
+yp <- paretoconv (x=z, a=3, n=1, x0 = xmin)
 ```
+Then the actual estimator function
+```{r est_a}
+est_a <- function (z, y, xmin = 10)
+{
+    #m <- conpl$new (y [y > 0])
+    #xmin <- estimate_xmin (m)$pars
+    1 + sum (y) / sum (y * log (z / (xmin - 0.5)))
+}
+est_a (z, y0)
+est_a (z, yz0)
+est_a (z, yz2)
+est_a (z, yp)
+```
+
+```{r tippy, echo = FALSE}
+library (tippy)
+tt <- paste0 ("<strong>Oh look</strong>, I'm a footnote, and i can go on and ",
+              "on and get really long and go over lots of lines, and include ",
+              "some extra stuff too.")
+tippy("<strong style='color: green;'>Here's a footnote</strong>", 
+      tooltip = tt,
+      allowHTML = TRUE,
+      animation = "scale",
+      duration = 1000, 
+      placement = "right",
+      arrow = TRUE,
+      size = "large",
+      theme = "translucent"
+)
+```
+
+
+
 
 
 
