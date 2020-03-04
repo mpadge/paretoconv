@@ -21,8 +21,13 @@ Imports:
     VGAM
 Suggests:
     devtools,
+    ggplot2,
     knitr,
-    testthat
+    magrittr,
+    rmarkdown,
+    showtext,
+    testthat,
+    tippy
 Remotes:
     csgillespie/poweRlaw
 VignetteBuilder: knitr
