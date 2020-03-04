@@ -4,35 +4,24 @@ sudo: false
 cache: packages
 
 matrix:
+    include:
+        - r: devel
+        - r: release
+          after_success:
+              - Rscript -e "covr::codecov()"
+        - r: oldrel
+        - r: release
+          os: osx
+        - r: oldrel
+          env: DEPS=cran
+          os: osx
     allow_failures:
         - r: oldrel # until fAsianOptions update makes it there.
-    include:
-        - r: release
-          env: DEPS=cran
-          os: linux
-        - r: release
-          env: DEPS=cran
-          os: osx
-        - r: oldrel
-          env: DEPS=cran
-          os: linux
-        - r: oldrel
-          env: DEPS=cran
-          os: osx
-          #- r: devel
-          #env: DEPS=cran
-          #os: linux
-          #- r: devel
-          #env: DEPS=cran
-          #os: osx
 
 notifications:
   email:
     on_success: change
     on_failure: change
 
-r_github_packages:
-      - jimhester/covr
-
-after_success:
-      - Rscript -e 'covr::codecov()'
+r_packages:
+  - covr
