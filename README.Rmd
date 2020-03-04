@@ -38,8 +38,13 @@ distribution function, otherwise the probability density function is returned.
 
 ### Installation
 
-```{r git-install, eval=FALSE}
-devtools::install_github('mpadge/paretoconv')
+`paretoconv` is not (yet) on CRAN, and can be installed with any of the
+following options:
+```{r git-install, eval = FALSE}
+remotes::install_git("https://git.sr.ht/~mpadge/paretoconv")
+remotes::install_bitbucket("mpadge/paretoconv")
+remotes::install_gitlab("mpadge/paretoconv")
+remotes::install_github("mpadge/paretoconv")
 ```
 
 ```{r install, echo=FALSE, message=FALSE}
