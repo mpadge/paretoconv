@@ -5,18 +5,16 @@ cache: packages
 
 matrix:
     include:
-        - r: devel
+        - r: oldrel
         - r: release
           after_success:
               - Rscript -e "covr::codecov()"
-        - r: oldrel
+        - r: devel
+    allow_failures:
         - r: release
           os: osx
         - r: oldrel
-          env: DEPS=cran
           os: osx
-    allow_failures:
-        - r: oldrel # until fAsianOptions update makes it there.
 
 notifications:
   email:
