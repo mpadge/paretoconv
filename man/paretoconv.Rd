@@ -2,12 +2,11 @@
 % Please edit documentation in R/paretoconv-package.R, R/paretoconv.R
 \docType{package}
 \name{paretoconv}
-\alias{paretoconv}
 \alias{paretoconv-package}
+\alias{paretoconv}
 \title{paretoconv.}
 \usage{
-paretoconv(x, a, n, x0 = 1, cdf = FALSE, asymp = TRUE,
-  quiet = TRUE)
+paretoconv(x, a, n, x0 = 1, cdf = FALSE, asymp = TRUE, quiet = TRUE)
 }
 \arguments{
 \item{x}{value of independent variable (may be a vector)}
@@ -34,6 +33,8 @@ Value for the CDF or PDF from the convolution of two Pareto
 distributions of shape a at the value x.
 }
 \description{
+Calculates the n-fold convolution of two Pareto distributions using the techniques devised by Colin Ramsay.
+
 Convolutes multiple Pareto distributions following 
 \itemize{
 \item For integer shape parameters: 'The Distribution of Sums of Certain
@@ -53,6 +54,14 @@ so CDFs to not sum to unity, and PDFs do not integrate to unity.
 }
 \examples{
 paretoconv (x=1:10, a=2, n=0)
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/mpadge/paretoconv}
+  \item Report bugs at \url{https://github.com/mpadge/paretoconv/issues}
+}
+
 }
 \author{
 Mark Padgham

@@ -1,6 +1,6 @@
 Package: paretoconv
 Title: Calculates the N-Fold Convolution of Two Pareto Distributions
-Version: 0.0.1
+Version: 0.0.1.001
 Authors@R: c(
     person("Mark", "Padgham", email="mark.padgham@email.com", role=c("aut", "cre")),
     person("Colin", "Gillespie", role=c ("ctb", "cph"),
@@ -14,7 +14,6 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     cubature,
-    fAsianOptions,
     methods,
     poweRlaw,
     stats,
@@ -32,6 +31,6 @@ Suggests:
 Remotes:
     csgillespie/poweRlaw
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.3.3
 URL: https://github.com/mpadge/paretoconv
 BugReports: https://github.com/mpadge/paretoconv/issues

@@ -9,10 +9,8 @@
 #' @noRd
 chi <- function (z, a, n)
 {
-    # Kummer's M function, the confluent hypergeometric _1F_1. NOTE:
-    # fAsianOptions reverses the order of the arguments from Abramowitz &
-    # Stegun!
-    kM <- function (a, b, z) fAsianOptions::kummerM (z, a, b) # Eq. (13) # nolint
+    # Kummer's M function, the confluent hypergeometric _1F_1. 
+    kM <- function (a, b, z) kummerM (z, a, b) # Eq. (13) # nolint
     # NOTE: cot (z) = 1 / tan (z)
     RI <- function (z, a, n, r)
     {
