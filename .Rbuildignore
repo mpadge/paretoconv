@@ -1,7 +1,6 @@
-^aaa\.Rmd$
 ^README\.*
+^\.pre-commit-config\.yaml$
+^aaa\.Rmd$
 ^vignettes/makefile$
 docs/
-^\.travis\.yml$
-^appveyor.yml$
 fig/
