@@ -14,7 +14,6 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     cubature,
-    fAsianOptions,
     methods,
     poweRlaw,
     stats,
@@ -32,6 +31,6 @@ Suggests:
 Remotes:
     csgillespie/poweRlaw
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+RoxygenNote: 7.3.3
 URL: https://github.com/mpadge/paretoconv
 BugReports: https://github.com/mpadge/paretoconv/issues

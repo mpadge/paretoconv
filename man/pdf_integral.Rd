@@ -5,8 +5,7 @@
 \title{Calculates integral of probability density functions for convoluted Pareto
 distributions}
 \usage{
-pdf_integral(a, x0 = 1, n = 0, discrete = TRUE, xmin = 0,
-  quiet = TRUE)
+pdf_integral(a, x0 = 1, n = 0, discrete = TRUE, xmin = 0, quiet = TRUE)
 }
 \arguments{
 \item{a}{Shape parameter of Pareto disitribution}
